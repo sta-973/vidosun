@@ -1,46 +1,39 @@
 from flask import Flask, request, render_template, send_from_directory, jsonify
 from flask_cors import CORS
-import subprocess, os, threading
+import subprocess, os, threading, time, uuid
 
-# === Konfigurasi Flask ===
-# Template & static file langsung di root folder
 app = Flask(__name__, template_folder='.')
 CORS(app)
 
-# === Folder download ===
 DOWNLOAD_FOLDER = 'downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-# === Status unduhan ===
-download_status = {}
+download_queue = {}  # simpan status download per id
 
-
-def download_video(url, format_opt):
-    """Menjalankan yt-dlp dan memantau progres unduhan"""
-    global download_status
-    download_status[url] = {'status': 'downloading', 'progress': 0}
+def download_video(task_id, url, format_opt):
+    """Jalankan yt-dlp di thread terpisah"""
+    filename = os.path.join(DOWNLOAD_FOLDER, f"{task_id}.%(ext)s")
+    cmd = ['yt-dlp', '-f', format_opt, '-o', filename, url]
     try:
-        cmd = [
-            'yt-dlp',
-            '-f', format_opt,
-            '-o', os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
-            url
-        ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         for line in proc.stdout:
             if '[download]' in line and '%' in line:
                 try:
                     perc = float(line.split('%')[0].split()[-1])
-                    download_status[url]['progress'] = int(perc)
+                    download_queue[task_id]['progress'] = int(perc)
                 except:
                     pass
         proc.wait()
-        download_status[url]['status'] = 'done' if proc.returncode == 0 else 'error'
+        # cari nama file hasil download
+        files = os.listdir(DOWNLOAD_FOLDER)
+        for f in files:
+            if task_id in f:
+                download_queue[task_id]['file'] = f
+        download_queue[task_id]['status'] = 'done' if proc.returncode == 0 else 'error'
     except Exception as e:
-        download_status[url] = {'status': f'error: {e}', 'progress': 0}
+        download_queue[task_id]['status'] = f'error: {e}'
 
 
-# === ROUTES ===
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -50,31 +43,37 @@ def index():
 def start_download():
     url = request.form.get('url')
     fmt = request.form.get('format', 'best')
-    if url:
-        threading.Thread(target=download_video, args=(url, fmt), daemon=True).start()
-        return jsonify({'status': 'started'}), 200
-    return jsonify({'status': 'error', 'message': 'URL tidak ada'}), 400
+    if not url:
+        return jsonify({'status': 'error', 'message': 'URL tidak ada'}), 400
+
+    task_id = str(uuid.uuid4())[:8]  # id unik per unduhan
+    download_queue[task_id] = {'status': 'downloading', 'progress': 0, 'file': None}
+
+    threading.Thread(target=download_video, args=(task_id, url, fmt), daemon=True).start()
+    return jsonify({'status': 'started', 'task_id': task_id})
 
 
 @app.route('/progress')
 def progress():
-    url = request.args.get('url')
-    if url in download_status:
-        return jsonify(download_status[url]), 200
-    return jsonify({'status': 'not_started', 'progress': 0}), 200
+    task_id = request.args.get('task')
+    if not task_id or task_id not in download_queue:
+        return jsonify({'status': 'not_found', 'progress': 0}), 200
+    return jsonify(download_queue[task_id])
 
 
 @app.route('/getfile')
 def get_file():
-    files = os.listdir(DOWNLOAD_FOLDER)
-    if files:
-        files.sort(key=lambda x: os.path.getmtime(os.path.join(DOWNLOAD_FOLDER, x)), reverse=True)
-        filename = files[0]
-        return send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True)
-    return 'File belum tersedia', 404
+    task_id = request.args.get('task')
+    if not task_id or task_id not in download_queue:
+        return "Task tidak ditemukan", 404
+
+    task = download_queue[task_id]
+    if task['status'] != 'done' or not task['file']:
+        return jsonify({'error': 'file belum siap'}), 202
+
+    return send_from_directory(DOWNLOAD_FOLDER, task['file'], as_attachment=True)
 
 
-# === Jalankan Aplikasi ===
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
