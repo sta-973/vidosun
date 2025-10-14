@@ -249,31 +249,66 @@
   </footer>
 
   <!-- ✅ Script langsung di HTML -->
-  <script>
-    document.getElementById("downloadForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const btn = document.getElementById("downloadBtn");
-      const url = document.getElementById("urlInput").value.trim();
+ <script>
+document.getElementById("downloadForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("downloadBtn");
+  const url = document.getElementById("urlInput").value.trim();
 
-      if (!url) {
-        alert("Masukkan URL terlebih dahulu!");
-        return;
-      }
+  if (!url) {
+    alert("Masukkan URL video terlebih dahulu!");
+    return;
+  }
 
-      btn.classList.add("active");
-      btn.textContent = "Menyiapkan unduhan...";
+  btn.textContent = "Sedang menyiapkan...";
+  btn.disabled = true;
 
-      // 🔹 Simulasi proses download
-      setTimeout(() => {
-        const link = document.createElement("a");
-        link.href = "static/downloads/sample-video.mp4"; // contoh file
-        link.download = "video.mp4";
-        link.click();
-
-        btn.classList.remove("active");
-        btn.textContent = "Download";
-      }, 2000);
+  try {
+    // Kirim permintaan download ke backend Flask
+    let res = await fetch("/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ url: url, format: "best" })
     });
-  </script>
+
+    let data = await res.json();
+    if (data.status === "started") {
+      checkProgress(url);
+    } else {
+      alert("Gagal memulai unduhan: " + data.message);
+      btn.textContent = "Download";
+      btn.disabled = false;
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan koneksi ke server!");
+    btn.textContent = "Download";
+    btn.disabled = false;
+  }
+});
+
+async function checkProgress(url) {
+  const btn = document.getElementById("downloadBtn");
+  let interval = setInterval(async () => {
+    let res = await fetch("/progress?url=" + encodeURIComponent(url));
+    let data = await res.json();
+
+    if (data.status === "downloading") {
+      btn.textContent = "Mengunduh... " + data.progress + "%";
+    } else if (data.status === "done") {
+      clearInterval(interval);
+      btn.textContent = "Selesai! Klik untuk unduh";
+      btn.disabled = false;
+      // Ambil file hasil download
+      window.location.href = "/getfile";
+    } else if (data.status.startsWith("error")) {
+      clearInterval(interval);
+      alert("Gagal mengunduh: " + data.status);
+      btn.textContent = "Download";
+      btn.disabled = false;
+    }
+  }, 3000);
+}
+</script>
 </body>
 </html>
+
