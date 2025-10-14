@@ -249,7 +249,7 @@
   </footer>
 
   <!-- ✅ Script langsung di HTML -->
- <script>
+<script>
 document.getElementById("downloadForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("downloadBtn");
@@ -264,7 +264,7 @@ document.getElementById("downloadForm").addEventListener("submit", async functio
   btn.disabled = true;
 
   try {
-    // Kirim permintaan download ke backend Flask
+    // Kirim permintaan download ke backend
     let res = await fetch("/download", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -275,7 +275,7 @@ document.getElementById("downloadForm").addEventListener("submit", async functio
     if (data.status === "started") {
       checkProgress(url);
     } else {
-      alert("Gagal memulai unduhan: " + data.message);
+      alert("Gagal memulai unduhan: " + (data.message || "unknown"));
       btn.textContent = "Download";
       btn.disabled = false;
     }
@@ -288,27 +288,52 @@ document.getElementById("downloadForm").addEventListener("submit", async functio
 
 async function checkProgress(url) {
   const btn = document.getElementById("downloadBtn");
-  let interval = setInterval(async () => {
+  let tries = 0;
+
+  const interval = setInterval(async () => {
+    tries++;
     let res = await fetch("/progress?url=" + encodeURIComponent(url));
     let data = await res.json();
 
     if (data.status === "downloading") {
       btn.textContent = "Mengunduh... " + data.progress + "%";
-    } else if (data.status === "done") {
+    } 
+    else if (data.status === "done") {
       clearInterval(interval);
-      btn.textContent = "Selesai! Klik untuk unduh";
+      btn.textContent = "Menyiapkan file...";
+      await waitForFileReady(); // tunggu file benar-benar siap
+      btn.textContent = "Mengunduh file...";
       btn.disabled = false;
-      // Ambil file hasil download
-      window.location.href = "/getfile";
-    } else if (data.status.startsWith("error")) {
+      window.location.href = "/getfile"; // download file
+      setTimeout(() => { btn.textContent = "Download"; }, 3000);
+    } 
+    else if (data.status.startsWith("error")) {
       clearInterval(interval);
       alert("Gagal mengunduh: " + data.status);
+      btn.textContent = "Download";
+      btn.disabled = false;
+    } 
+    else if (tries > 40) { // batas 2 menit
+      clearInterval(interval);
+      alert("Waktu unduhan habis. Coba lagi.");
       btn.textContent = "Download";
       btn.disabled = false;
     }
   }, 3000);
 }
+
+// ✅ Fungsi tunggu file benar-benar siap
+async function waitForFileReady() {
+  for (let i = 0; i < 10; i++) { // cek 10x (30 detik total)
+    let res = await fetch("/getfile");
+    if (res.ok) return true;
+    await new Promise(r => setTimeout(r, 3000)); // tunggu 3 detik
+  }
+  alert("File belum siap. Silakan coba ulang.");
+  return false;
+}
 </script>
 </body>
 </html>
+
 
