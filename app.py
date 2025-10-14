@@ -4,7 +4,7 @@ import subprocess, os, threading
 
 # === Konfigurasi Flask ===
 # Template & static file langsung di root folder
-app = Flask(__name__, static_folder='.', template_folder='.')
+app = Flask(__name__, template_folder='.')
 CORS(app)
 
 # === Folder download ===
@@ -78,3 +78,4 @@ def get_file():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
