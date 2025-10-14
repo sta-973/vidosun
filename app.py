@@ -1,77 +1,97 @@
 from flask import Flask, request, render_template, send_from_directory, jsonify
 from flask_cors import CORS
-import subprocess, os, threading, time, uuid
+import subprocess, os, threading
 
-app = Flask(__name__, template_folder='.')
+# === Inisialisasi ===
+app = Flask(__name__, template_folder='.', static_folder='static')
 CORS(app)
 
-DOWNLOAD_FOLDER = 'downloads'
+DOWNLOAD_FOLDER = os.path.join('static', 'downloads')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-download_queue = {}  # simpan status download per id
+download_status = {}  # status per URL
 
-def download_video(task_id, url, format_opt):
-    """Jalankan yt-dlp di thread terpisah"""
-    filename = os.path.join(DOWNLOAD_FOLDER, f"{task_id}.%(ext)s")
-    cmd = ['yt-dlp', '-f', format_opt, '-o', filename, url]
+
+# === Fungsi download video ===
+def download_video(url, format_opt):
+    global download_status
+    download_status[url] = {'status': 'downloading', 'progress': 0, 'filename': None}
     try:
+        cmd = [
+            'yt-dlp',
+            '-f', format_opt,
+            '-o', os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
+            url
+        ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        last_filename = None
         for line in proc.stdout:
+            # Tangkap progres
             if '[download]' in line and '%' in line:
                 try:
                     perc = float(line.split('%')[0].split()[-1])
-                    download_queue[task_id]['progress'] = int(perc)
+                    download_status[url]['progress'] = int(perc)
                 except:
                     pass
+            # Tangkap nama file hasil
+            if 'Destination:' in line:
+                last_filename = line.split('Destination:')[-1].strip()
+
         proc.wait()
-        # cari nama file hasil download
-        files = os.listdir(DOWNLOAD_FOLDER)
-        for f in files:
-            if task_id in f:
-                download_queue[task_id]['file'] = f
-        download_queue[task_id]['status'] = 'done' if proc.returncode == 0 else 'error'
+        if proc.returncode == 0:
+            download_status[url]['status'] = 'done'
+            download_status[url]['filename'] = os.path.basename(last_filename)
+        else:
+            download_status[url]['status'] = 'error'
     except Exception as e:
-        download_queue[task_id]['status'] = f'error: {e}'
+        download_status[url] = {'status': f'error: {e}', 'progress': 0, 'filename': None}
 
 
+# === Route utama ===
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+# === Jalankan download ===
 @app.route('/download', methods=['POST'])
 def start_download():
     url = request.form.get('url')
     fmt = request.form.get('format', 'best')
-    if not url:
-        return jsonify({'status': 'error', 'message': 'URL tidak ada'}), 400
-
-    task_id = str(uuid.uuid4())[:8]  # id unik per unduhan
-    download_queue[task_id] = {'status': 'downloading', 'progress': 0, 'file': None}
-
-    threading.Thread(target=download_video, args=(task_id, url, fmt), daemon=True).start()
-    return jsonify({'status': 'started', 'task_id': task_id})
+    if url:
+        threading.Thread(target=download_video, args=(url, fmt), daemon=True).start()
+        return jsonify({'status': 'started'}), 200
+    return jsonify({'status': 'error', 'message': 'URL tidak ada'}), 400
 
 
+# === Pantau progres ===
 @app.route('/progress')
 def progress():
-    task_id = request.args.get('task')
-    if not task_id or task_id not in download_queue:
-        return jsonify({'status': 'not_found', 'progress': 0}), 200
-    return jsonify(download_queue[task_id])
+    url = request.args.get('url')
+    if url in download_status:
+        return jsonify(download_status[url]), 200
+    return jsonify({'status': 'not_started', 'progress': 0}), 200
 
 
+# === Ambil file terakhir ===
 @app.route('/getfile')
 def get_file():
-    task_id = request.args.get('task')
-    if not task_id or task_id not in download_queue:
-        return "Task tidak ditemukan", 404
+    url = request.args.get('url')
+    info = download_status.get(url)
+    if info and info.get('filename'):
+        filename = info['filename']
+        file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+        if os.path.exists(file_path):
+            public_url = f"/{file_path}"  # link publik
+            return jsonify({'status': 'ready', 'url': public_url}), 200
+    return jsonify({'error': 'file not ready'}), 404
 
-    task = download_queue[task_id]
-    if task['status'] != 'done' or not task['file']:
-        return jsonify({'error': 'file belum siap'}), 202
 
-    return send_from_directory(DOWNLOAD_FOLDER, task['file'], as_attachment=True)
+# === Akses file download secara publik ===
+@app.route('/static/downloads/<path:filename>')
+def serve_download(filename):
+    return send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True)
 
 
 if __name__ == '__main__':
