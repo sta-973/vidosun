@@ -2,13 +2,17 @@ from flask import Flask, request, render_template, send_from_directory, jsonify
 from flask_cors import CORS
 import subprocess, os, threading
 
-app = Flask(__name__)
-CORS(app)  # izinkan akses lintas domain (penting untuk online)
+# === Konfigurasi Flask ===
+# Template & static file langsung di root folder
+app = Flask(__name__, template_folder='.')
+CORS(app)
 
+# === Folder download ===
 DOWNLOAD_FOLDER = 'downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-download_status = {}  # track progress per URL
+# === Status unduhan ===
+download_status = {}
 
 
 def download_video(url, format_opt):
@@ -36,6 +40,7 @@ def download_video(url, format_opt):
         download_status[url] = {'status': f'error: {e}', 'progress': 0}
 
 
+# === ROUTES ===
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -69,6 +74,7 @@ def get_file():
     return 'File belum tersedia', 404
 
 
+# === Jalankan Aplikasi ===
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
