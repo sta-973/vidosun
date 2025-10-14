@@ -1,93 +1,139 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
-<meta charset="UTF-8">
-<meta name="google-site-verification" content="RvYdoR8BfUECZAC7WYGXNk2NCxVuAF2ZrPS4zWlxrDk" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Downloader Sosial Media - Advanced</title>
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/724/724933.png">
-<meta name="description" content="Unduh video dan audio dari YouTube, TikTok, dan sosial media lainnya dengan cepat dan aman.">
-<style>
-  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #f8f9fa; color: #333; }
-  input, select { padding: 8px; width: 300px; margin: 5px; border: 1px solid #ccc; border-radius: 5px; }
-  button { padding: 8px 15px; margin-top: 5px; border: none; border-radius: 5px; background: #007bff; color: #fff; cursor: pointer; }
-  button:hover { background: #0056b3; }
-  #bar-container { width: 300px; height: 20px; background: #ddd; margin: 15px auto; border-radius: 10px; overflow: hidden; display: none; }
-  #bar { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
-  #message { margin-top: 10px; font-size: 14px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="google-site-verification" content="RvYdoR8BfUECZAC7WYGXNk2NCxVuAF2ZrPS4zWlxrDk" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vidosun - Downloader Sosial Media</title>
+  <meta name="description" content="Unduh video dan audio dari YouTube, TikTok, Instagram, Facebook, dan sosial media lainnya dengan cepat dan aman.">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/724/724933.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      outline: none;
+    }
+    button {
+      background: #ffce00;
+      color: #000;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ffc400;
+      transform: scale(1.05);
+    }
+    section {
+      margin-top: 40px;
+      text-align: left;
+      background: rgba(255,255,255,0.15);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 700px;
+    }
+    footer {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-<h1>📥 YouTube & Sosial Media Downloader</h1>
 
-<input type="text" id="url" placeholder="Tempel URL di sini..."><br>
-<select id="format">
-  <option value="best">Video & Audio (terbaik)</option>
-  <option value="bestaudio">Audio Saja</option>
-  <option value="bestvideo">Video Saja</option>
-</select><br>
-<button id="btnDownload">Mulai Download</button>
+  <header>
+    <h1>Vidosun.com</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#cara">Cara Menggunakan</a>
+      <a href="#kontak">Kontak</a>
+    </nav>
+  </header>
 
-<div id="bar-container"><div id="bar"></div></div>
-<div id="message"></div>
+  <main>
+    <div class="container">
+      <h2>Unduh Video dari Sosial Media</h2>
+      <p>Tempel link video di bawah, lalu klik tombol Download.</p>
+      <form id="downloadForm">
+        <input type="text" id="urlInput" placeholder="Tempel link video di sini..." required>
+        <button type="submit">Download</button>
+      </form>
+    </div>
 
-<script>
-const btn = document.getElementById('btnDownload');
-const urlInput = document.getElementById('url');
-const formatSelect = document.getElementById('format');
-const bar = document.getElementById('bar');
-const barContainer = document.getElementById('bar-container');
-const msg = document.getElementById('message');
+    <section id="cara">
+      <h2>Cara Menggunakan Vidosun</h2>
+      <ol>
+        <li>Salin link video dari YouTube, TikTok, Facebook, Instagram, atau platform lain.</li>
+        <li>Tempel link tersebut ke kolom di atas.</li>
+        <li>Klik tombol “Download”, lalu tunggu hingga video siap diunduh.</li>
+      </ol>
+    </section>
 
-btn.addEventListener('click', async () => {
-  const url = urlInput.value.trim();
-  const fmt = formatSelect.value;
-  if (!url) return alert('Masukkan URL dulu!');
+    <section id="kontak">
+      <h2>Kontak & Dukungan</h2>
+      <p>Jika ada pertanyaan, kirim email ke: <b>support@vidosun.com</b></p>
+    </section>
+  </main>
 
-  bar.style.width = '0%';
-  barContainer.style.display = 'block';
-  msg.textContent = '🔄 Memulai download...';
+  <footer>
+    <p>© 2025 Vidosun.com | Dibuat dengan ❤️ oleh womisa2008</p>
+  </footer>
 
-  try {
-    const res = await fetch('/download', {
-      method: 'POST',
-      body: new URLSearchParams({ url, format: fmt })
-    });
-    const data = await res.json();
-    if (data.status !== 'started') throw new Error('Gagal memulai download');
-  } catch (e) {
-    msg.textContent = '❌ Tidak bisa menghubungi server.';
-    barContainer.style.display = 'none';
-    return;
-  }
-
-  const interval = setInterval(async () => {
-    try {
-      const res = await fetch('/progress?url=' + encodeURIComponent(url));
-      const data = await res.json();
-
-      if (data.status === 'downloading') {
-        bar.style.width = data.progress + '%';
-        msg.textContent = `Mengunduh... ${data.progress}%`;
-      } else if (data.status === 'done') {
-        bar.style.width = '100%';
-        msg.innerHTML = `✅ Selesai! <a href="/getfile">Klik di sini untuk unduh</a>`;
-        clearInterval(interval);
-        setTimeout(() => barContainer.style.display = 'none', 4000);
-      } else if (data.status.startsWith('error')) {
-        msg.textContent = '❌ ' + data.status;
-        clearInterval(interval);
-        setTimeout(() => barContainer.style.display = 'none', 4000);
-      }
-    } catch {
-      msg.textContent = '⚠️ Gagal membaca progres.';
-      clearInterval(interval);
-      setTimeout(() => barContainer.style.display = 'none', 4000);
-    }
-  }, 1000);
-});
-</script>
 </body>
 </html>
