@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, send_from_directory, jsonify
 from flask_cors import CORS
 import subprocess, os, threading
 
-app = Flask(__name__)
+app = Flask(__name__, templates_folder='.')
 CORS(app)  # izinkan akses lintas domain (penting untuk online)
 
 DOWNLOAD_FOLDER = 'downloads'
@@ -72,3 +72,4 @@ def get_file():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
