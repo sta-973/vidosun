@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vidosun - Downloader Sosial Media</title>
 <style>
-body { background: #111; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding:50px 15px; }
-h1 { margin-bottom:20px; }
-form { position: relative; width:100%; max-width:500px; }
-input[type=text] { width:100%; padding:12px 40px 12px 12px; border-radius:8px; border:none; font-size:1rem; }
-button { position:absolute; right:5px; top:5px; bottom:5px; background:#ffce00; border:none; border-radius:5px; width:30px; cursor:pointer; font-weight:bold; }
-button:hover { background:#ffd700; }
-input:focus { outline:none; }
-p { margin-top:20px; }
-a { color:#ffce00; text-decoration:underline; }
+  body { background: #111; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px 15px; }
+  h1 { margin-bottom: 20px; }
+  form { position: relative; width: 100%; max-width: 500px; }
+  input[type=text] { width: 100%; padding: 12px 40px 12px 12px; border-radius: 8px; border: none; font-size: 1rem; }
+  button { position: absolute; right: 5px; top: 5px; bottom: 5px; background: #ffce00; border: none; border-radius: 5px; width: 30px; cursor: pointer; font-weight: bold; }
+  button:hover { background: #ffd700; }
+  input:focus { outline: none; }
+  p { margin-top: 20px; }
+  a { color: #ffce00; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -23,29 +23,21 @@ a { color:#ffce00; text-decoration:underline; }
   <button type="button" id="resetBtn">×</button>
 </form>
 <p>Tempel link video dan tekan Enter untuk mulai download.</p>
-<p>🎬 Vidosun Downloader: Unduh video dan audio dari YouTube, TikTok, Instagram secara cepat dan gratis.</p>
-
+<p>🎬 Vidosun Downloader — Unduh video dan audio dari YouTube, TikTok, dan sosial media lainnya.</p>
 <p>🌐 Website Resmi: https://vidosun.com</p>
-<p>🚀 Fitur Utama</p>
-<p>✅ Salin link video dari sosial media.</p>
-<p>🎵 Tempelkan link ke kolom input di halaman utama.</p>
-<p>🎥 Tekan Enter atau Submit untuk mulai download.</p>
 <p>⚡ Gunakan tombol silang di kanan input untuk reset link.</p>
-<p>📂 File sementara disimpan di folder <b>static/downloads/</b></p>
-<p>Support: womisa2008@gmail.com</p>
-
-<p>📖 <a href="/readme">Lihat README.md</a></p>
 
 <script>
-document.getElementById('resetBtn').addEventListener('click', function() {
+  document.getElementById('resetBtn').addEventListener('click', function() {
     document.getElementById('urlInput').value = '';
-});
-document.getElementById('downloadForm').addEventListener('submit', function(e){
-    if(!document.getElementById('urlInput').value.trim()){
-        e.preventDefault();
-        alert("Masukkan URL video!");
+  });
+
+  document.getElementById('downloadForm').addEventListener('submit', function(e) {
+    if (!document.getElementById('urlInput').value.trim()) {
+      e.preventDefault();
+      alert("Masukkan URL video!");
     }
-});
+  });
 </script>
 </body>
 </html>
