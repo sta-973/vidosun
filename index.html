@@ -5,11 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vidosun - Downloader Sosial Media</title>
 <style>
-  body { background: #111; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px 15px; }
+  body {
+    background: #111;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 15px;
+  }
   h1 { margin-bottom: 20px; }
   form { position: relative; width: 100%; max-width: 500px; }
-  input[type=text] { width: 100%; padding: 12px 40px 12px 12px; border-radius: 8px; border: none; font-size: 1rem; }
-  button { position: absolute; right: 5px; top: 5px; bottom: 5px; background: #ffce00; border: none; border-radius: 5px; width: 30px; cursor: pointer; font-weight: bold; }
+  input[type=text] {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+  }
+  button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+    background: #ffce00;
+    border: none;
+    border-radius: 5px;
+    width: 30px;
+    cursor: pointer;
+    font-weight: bold;
+  }
   button:hover { background: #ffd700; }
   input:focus { outline: none; }
   p { margin-top: 20px; }
@@ -22,10 +47,24 @@
   <input type="text" name="url" id="urlInput" placeholder="Tempel link video di sini..." required>
   <button type="button" id="resetBtn">×</button>
 </form>
+
 <p>Tempel link video dan tekan Enter untuk mulai download.</p>
-<p>🎬 Vidosun Downloader — Unduh video dan audio dari YouTube, TikTok, dan sosial media lainnya.</p>
+<p>🎬 Vidosun Downloader — unduh video dan audio dari YouTube, TikTok, dan sosial media lainnya secara cepat dan gratis.</p>
 <p>🌐 Website Resmi: https://vidosun.com</p>
-<p>⚡ Gunakan tombol silang di kanan input untuk reset link.</p>
+<p>🚀 Fitur Utama:</p>
+<ul>
+<li>✅ Salin link video dari sosial media.</li>
+<li>🎵 Tempelkan link ke kolom input.</li>
+<li>🎥 Tekan Enter atau Submit untuk mulai download.</li>
+<li>⚡ Gunakan tombol silang di kanan input untuk reset link.</li>
+</ul>
+<p>Catatan:</p>
+<ul>
+<li>Pastikan server sudah terinstall yt-dlp.</li>
+<li>File sementara disimpan di folder <code>static/downloads/</code>.</li>
+<li>Folder downloads dapat dihapus secara berkala jika penuh.</li>
+</ul>
+<p>Support: Email: womisa2008@gmail.com</p>
 
 <script>
   document.getElementById('resetBtn').addEventListener('click', function() {
