@@ -38,6 +38,7 @@
   button:hover { background: #ffd700; }
   input:focus { outline: none; }
   p { margin-top: 20px; }
+  a { color: #ffce00; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -47,13 +48,13 @@
   <button type="button" id="resetBtn">×</button>
 </form>
 <p>Tempel link video dan tekan Enter untuk mulai download.</p>
+<p>Lihat petunjuk: <a href="/readme" target="_blank">README.md</a></p>
 
 <script>
   document.getElementById('resetBtn').addEventListener('click', function() {
     document.getElementById('urlInput').value = '';
   });
 
-  // Submit form dengan Enter
   document.getElementById('downloadForm').addEventListener('submit', function(e) {
     if (!document.getElementById('urlInput').value.trim()) {
       e.preventDefault();
