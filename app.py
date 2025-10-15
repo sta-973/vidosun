@@ -1,16 +1,13 @@
 from flask import Flask, request, send_file, render_template
 import os
 import subprocess
-import urllib.parse
 
 app = Flask(__name__, template_folder='.', static_folder='static')
 
-# Folder untuk simpan sementara file download
 DOWNLOAD_FOLDER = os.path.join('static', 'downloads')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 def sanitize_filename(name):
-    # Hapus karakter yang bermasalah di filename
     return "".join(c for c in name if c.isalnum() or c in " ._-").strip()
 
 @app.route('/')
@@ -24,10 +21,8 @@ def download():
         return "URL tidak ditemukan!", 400
 
     try:
-        # Tentukan output file sementara
         output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
 
-        # Jalankan yt-dlp
         proc = subprocess.run([
             'yt-dlp',
             '-f', 'best',
@@ -39,17 +34,24 @@ def download():
             print(proc.stderr)
             return "Gagal download", 500
 
-        # Cari file terbaru di folder
         files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER)]
         latest_file = max(files, key=os.path.getctime)
 
-        # Kirim file ke user
         filename = sanitize_filename(os.path.basename(latest_file))
         return send_file(latest_file, as_attachment=True, download_name=filename)
 
     except Exception as e:
         print(e)
         return f"Gagal download: {e}", 500
+
+@app.route('/readme')
+def readme():
+    try:
+        with open("README.md", "r", encoding="utf-8") as f:
+            content = f.read()
+        return f"<pre style='white-space: pre-wrap; color: #fff; background: #111; padding:20px;'>{content}</pre>"
+    except:
+        return "README.md tidak ditemukan", 404
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
