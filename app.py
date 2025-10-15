@@ -23,9 +23,10 @@ def download():
     try:
         output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
 
-        # Gunakan python -m yt_dlp agar path executable pasti ada
+        # Panggil yt-dlp dengan python -m yt_dlp
         proc = subprocess.run([
             'python', '-m', 'yt_dlp',
+            '-f', 'best',
             '-o', output_template,
             url
         ], capture_output=True, text=True)
@@ -35,12 +36,9 @@ def download():
             return f"Gagal download: {proc.stderr}", 500
 
         files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER)]
-        if not files:
-            return "File tidak ditemukan setelah download.", 500
-
         latest_file = max(files, key=os.path.getctime)
-        filename = sanitize_filename(os.path.basename(latest_file))
 
+        filename = sanitize_filename(os.path.basename(latest_file))
         return send_file(latest_file, as_attachment=True, download_name=filename)
 
     except Exception as e:
