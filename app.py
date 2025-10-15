@@ -24,9 +24,23 @@ def download():
     try:
         output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
 
-        # Jalankan yt-dlp
+        # Header untuk menghindari 429
+        headers = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7'
+        ]
+        header_args = []
+        for h in headers:
+            header_args += ['--add-header', h]
+
+        # Gunakan cookies (optional) untuk video terbatas
+        cookies_path = os.path.join('cookies.txt')
+        cookie_args = ['--cookies', cookies_path] if os.path.exists(cookies_path) else []
+
         proc = subprocess.run([
             'yt-dlp',
+            *header_args,
+            *cookie_args,
             '-o', output_template,
             url
         ], capture_output=True, text=True)
@@ -35,7 +49,6 @@ def download():
             print(proc.stderr)
             return jsonify({"status":"error","message":"Gagal download"}), 500
 
-        # Ambil file terbaru
         files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
         latest_file = max(files, key=os.path.getctime)
         filename = sanitize_filename(os.path.basename(latest_file))
