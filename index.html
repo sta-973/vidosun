@@ -1,177 +1,119 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vidosun - Downloader Sosial Media</title>
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/724/724933.png">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: #121212; /* hitam adem */
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-
-    header {
-      padding: 20px 0;
-      width: 100%;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-      position: sticky;
-      top: 0;
-      backdrop-filter: blur(6px);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: #ffce00;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 20px;
-    }
-
-    .container {
-      background: rgba(255,255,255,0.05);
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 15px;
-      font-size: 1rem;
-      background: #1f1f1f;
-      color: #e0e0e0;
-    }
-
-    button {
-      background: #ffce00;
-      color: #000;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 5px;
-    }
-
-    a {
-      color: #ffce00;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    section {
-      margin-top: 30px;
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 700px;
-      text-align: left;
-    }
-
-    section h2 {
-      margin-bottom: 10px;
-      border-left: 5px solid #ffce00;
-      padding-left: 10px;
-    }
-
-    footer {
-      margin-top: 20px;
-      padding: 15px;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vidosun - Downloader Sosial Media</title>
+<style>
+body {
+    background: #111; 
+    color: #eee;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+}
+.container {
+    background: #222;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+}
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 12px;
+}
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ffce00;
+    font-weight: bold;
+}
+#downloadLink {
+    display: block;
+    margin-top: 15px;
+    color: #0af;
+}
+#resetBtn {
+    margin-top: 10px;
+    background: #f33;
+    color: #fff;
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Vidosun.com</h1>
-  </header>
 
-  <main>
-    <div class="container">
-      <h2>Unduh Video dari Sosial Media</h2>
-      <input type="text" id="urlInput" placeholder="Tempel link video di sini..." required>
-      <div>
-        <button id="downloadBtn">Download</button>
-        <button id="resetBtn">Reset Download</button>
-      </div>
-      <div id="fileLink" style="margin-top:15px;"></div>
-    </div>
+<div class="container">
+<h2>Unduh Video dari Sosial Media</h2>
+<input type="text" id="urlInput" placeholder="Tempel link video di sini..." required>
+<button id="downloadBtn">Download</button>
+<a id="downloadLink" href="#" target="_blank"></a>
+<button id="resetBtn">Reset Download</button>
+</div>
 
-    <section>
-      <h2>Cara Menggunakan</h2>
-      <ol>
-        <li>Salin link video dari YouTube, TikTok, Instagram, atau Facebook.</li>
-        <li>Tempelkan link ke kolom di atas.</li>
-        <li>Klik tombol “Download” dan tunggu beberapa detik.</li>
-        <li>Jika selesai, tombol unduh akan muncul otomatis.</li>
-      </ol>
-    </section>
-  </main>
+<script>
+const urlInput = document.getElementById("urlInput");
+const downloadBtn = document.getElementById("downloadBtn");
+const downloadLink = document.getElementById("downloadLink");
+const resetBtn = document.getElementById("resetBtn");
 
-  <footer>
-    <p>© 2025 Vidosun.com | Dibuat dengan ❤️ oleh womisa2008@gmail.com</p>
-  </footer>
+downloadBtn.addEventListener("click", async () => {
+    const url = urlInput.value.trim();
+    if (!url) return alert("Masukkan URL video terlebih dahulu!");
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = "Proses download...";
 
-  <script>
-    const downloadBtn = document.getElementById("downloadBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const urlInput = document.getElementById("urlInput");
-    const fileLink = document.getElementById("fileLink");
-
-    downloadBtn.addEventListener("click", async () => {
-      const url = urlInput.value.trim();
-      if (!url) return alert("Masukkan URL video!");
-
-      // mulai download
-      await fetch("/download", {
+    await fetch("/download", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ url, format: "best" })
-      });
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: new URLSearchParams({url: url, format: "best"})
+    });
 
-      fileLink.innerHTML = "Tunggu sebentar, video sedang diproses...";
+    const interval = setInterval(async () => {
+        let res = await fetch(`/progress?url=${encodeURIComponent(url)}`);
+        let data = await res.json();
 
-      // cek file tiap 3 detik sampai tersedia
-      const interval = setInterval(async () => {
-        const res = await fetch(`/getfile?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        if (data.url) {
-          clearInterval(interval);
-          fileLink.innerHTML = `<a href="${data.url}" download>Download File</a>`;
+        if(data.status === "done") {
+            clearInterval(interval);
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = "Download";
+            downloadLink.href = `/getfile?url=${encodeURIComponent(url)}`;
+            downloadLink.textContent = "Klik di sini untuk mengunduh video";
+        } else if(data.status === "error") {
+            clearInterval(interval);
+            alert("Gagal download");
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = "Download";
+        } else {
+            downloadBtn.textContent = `Download... ${data.progress}% (${data.eta}s tersisa)`;
         }
-      }, 3000);
-    });
+    }, 2000);
+});
 
-    resetBtn.addEventListener("click", () => {
-      urlInput.value = "";
-      fileLink.innerHTML = "";
+// Reset download
+resetBtn.addEventListener("click", async () => {
+    const url = urlInput.value.trim();
+    if(!url) return;
+    await fetch("/reset", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: new URLSearchParams({url:url})
     });
-  </script>
+    downloadLink.href = "#";
+    downloadLink.textContent = "";
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = "Download";
+});
+</script>
+
 </body>
 </html>
