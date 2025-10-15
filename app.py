@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, render_template
 import os
 import subprocess
-from datetime import datetime
+import glob
 
 app = Flask(__name__, template_folder='.', static_folder='static')
 
@@ -22,26 +22,28 @@ def download():
         return "URL tidak ditemukan!", 400
 
     try:
-        # Buat nama file unik sementara
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        output_template = os.path.join(DOWNLOAD_FOLDER, f'{timestamp}_%(title)s.%(ext)s')
+        output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
 
-        # Gunakan python -m yt_dlp agar pasti ketemu di server
-        proc = subprocess.run([
-            'python', '-m', 'yt_dlp',
+        # Gunakan cookies dari browser otomatis
+        cmd = [
+            'python', '-m', 'yt_dlp', url,
             '-o', output_template,
-            url
-        ], capture_output=True, text=True)
+            '--cookies-from-browser', 'chrome',  # bisa ganti firefox
+            '--no-progress',
+            '--no-warnings'
+        ]
+
+        proc = subprocess.run(cmd, capture_output=True, text=True)
 
         if proc.returncode != 0:
             print(proc.stderr)
             return f"Gagal download: {proc.stderr}", 500
 
         # Ambil file terbaru
-        files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER)]
-        latest_file = max(files, key=os.path.getctime)
-
+        list_files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
+        latest_file = max(list_files, key=os.path.getctime)
         filename = sanitize_filename(os.path.basename(latest_file))
+
         return send_file(latest_file, as_attachment=True, download_name=filename)
 
     except Exception as e:
