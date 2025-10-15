@@ -2,6 +2,7 @@ from flask import Flask, request, send_file, render_template
 import os
 import subprocess
 import glob
+import time
 
 app = Flask(__name__, template_folder='.', static_folder='static')
 
@@ -22,17 +23,18 @@ def download():
         return "URL tidak ditemukan!", 400
 
     try:
+        # Hapus file lama dulu
+        files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
+        for f in files:
+            os.remove(f)
+
+        # Gunakan python -m yt_dlp untuk kestabilan
         output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
-
-        # Gunakan cookies dari browser otomatis
         cmd = [
-            'python', '-m', 'yt_dlp', url,
+            'python', '-m', 'yt_dlp',
             '-o', output_template,
-            '--cookies-from-browser', 'chrome',  # bisa ganti firefox
-            '--no-progress',
-            '--no-warnings'
+            url
         ]
-
         proc = subprocess.run(cmd, capture_output=True, text=True)
 
         if proc.returncode != 0:
@@ -40,10 +42,12 @@ def download():
             return f"Gagal download: {proc.stderr}", 500
 
         # Ambil file terbaru
-        list_files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
-        latest_file = max(list_files, key=os.path.getctime)
-        filename = sanitize_filename(os.path.basename(latest_file))
+        files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
+        if not files:
+            return "Gagal download: file tidak ditemukan", 500
 
+        latest_file = max(files, key=os.path.getctime)
+        filename = sanitize_filename(os.path.basename(latest_file))
         return send_file(latest_file, as_attachment=True, download_name=filename)
 
     except Exception as e:
