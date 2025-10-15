@@ -153,65 +153,67 @@
 
   <!-- Script download & progress -->
   <script>
-  document.getElementById("downloadForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById("downloadBtn");
-    const url = document.getElementById("urlInput").value.trim();
-    if (!url) return alert("Masukkan URL video terlebih dahulu!");
+document.getElementById("downloadForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("downloadBtn");
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) return alert("Masukkan URL video terlebih dahulu!");
 
-    btn.textContent = "Sedang memproses...";
-    btn.disabled = true;
+  btn.textContent = "Sedang memproses...";
+  btn.disabled = true;
 
-    try {
-      let res = await fetch("/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ url: url, format: "best" })
-      });
-      let data = await res.json();
+  try {
+    let res = await fetch("/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ url: url, format: "best" })
+    });
+    let data = await res.json();
 
-      if (data.status === "started") {
-        const task_id = url; // sekarang URL dipakai sebagai task_id
-        checkProgress(task_id, btn);
-      } else {
-        alert("Gagal memulai unduhan.");
-        btn.textContent = "Download";
-        btn.disabled = false;
-      }
-    } catch {
-      alert("Koneksi gagal ke server!");
+    if (data.status === "started") {
+      // gunakan URL sebagai task_id
+      checkProgress(url, btn);
+    } else {
+      alert("Gagal memulai unduhan.");
       btn.textContent = "Download";
       btn.disabled = false;
     }
-  });
+  } catch {
+    alert("Koneksi gagal ke server!");
+    btn.textContent = "Download";
+    btn.disabled = false;
+  }
+});
 
-  async function checkProgress(task_id, btn) {
-    const interval = setInterval(async () => {
-      let res = await fetch(`/progress?url=${task_id}`);
-      let data = await res.json();
+async function checkProgress(task_id, btn) {
+  const interval = setInterval(async () => {
+    let res = await fetch(`/progress?url=${task_id}`);
+    let data = await res.json();
 
-      if (data.status === "downloading") {
-        btn.textContent = `Mengunduh... ${data.progress}%`;
-      } else if (data.status === "done") {
-        clearInterval(interval);
-        let fileRes = await fetch(`/getfile?url=${task_id}`);
-        let fileData = await fileRes.json();
-        if (fileData.status === "ready") {
-          btn.textContent = "Klik untuk mengunduh";
-          btn.disabled = false;
-          btn.onclick = () => window.open(fileData.url, "_blank");
-        } else {
-          btn.textContent = "Download";
-          btn.disabled = false;
-        }
-      } else if (data.status.startsWith("error")) {
-        clearInterval(interval);
-        alert("Gagal: " + data.status);
+    if (data.status === "downloading") {
+      btn.textContent = `Mengunduh... ${data.progress}%`;
+    } else if (data.status === "done") {
+      clearInterval(interval);
+      let fileRes = await fetch(`/getfile?url=${task_id}`);
+      let fileData = await fileRes.json();
+      if (fileData.status === "ready") {
+        btn.textContent = "Klik untuk mengunduh";
+        btn.disabled = false;
+        btn.onclick = () => window.open(fileData.url, "_blank");
+      } else {
         btn.textContent = "Download";
         btn.disabled = false;
       }
-    }, 2000);
-  }
-  </script>
+    } else if (data.status.startsWith("error")) {
+      clearInterval(interval);
+      alert("Gagal: " + data.status);
+      btn.textContent = "Download";
+      btn.disabled = false;
+    }
+  }, 2000);
+}
+</script>
+
 </body>
 </html>
+
