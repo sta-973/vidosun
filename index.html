@@ -23,7 +23,7 @@
     border: none;
     font-size: 1rem;
   }
-  button {
+  button.download {
     position: absolute;
     right: 5px;
     top: 5px;
@@ -35,7 +35,18 @@
     cursor: pointer;
     font-weight: bold;
   }
-  button:hover { background: #ffd700; }
+  button.download:hover { background: #ffd700; }
+  button.reset {
+    position: absolute;
+    right: 45px;
+    top: 5px;
+    bottom: 5px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
   input:focus { outline: none; }
   p { margin-top: 20px; }
   a { color: #ffce00; text-decoration: underline; }
@@ -43,49 +54,65 @@
 </head>
 <body>
 <h1>Vidosun.com</h1>
-<form id="downloadForm" method="POST" action="/download">
+<form id="downloadForm">
   <input type="text" name="url" id="urlInput" placeholder="Tempel link video di sini..." required>
-  <button type="button" id="resetBtn">×</button>
+  <button type="submit" class="download">↓</button>
+  <button type="button" class="reset" id="resetBtn">×</button>
 </form>
-<p>Tempel link video dan tekan Enter untuk mulai download.</p>
-<p>🎬 Vidosun Downloader
-Selamat datang di Vidosun Downloader — aplikasi web sederhana untuk mengunduh video</p> 
-<p>dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
-
-<p>🌐 Website Resmi: https://vidosun.com</p>
-<p>🚀 Fitur Utama</p>
-<p>✅ Salin link video dari sosial media.</p>
-<p>🎵 Tempelkan link ke kolom input di halaman utama.</p>
-<p>🎥 Tekan Enter atau Submit untuk mulai download.</p>
-<p>📊 Tunggu hingga file dikirim ke browser Anda.</p>
-<p>⚡ Gunakan tombol silang di kanan input untuk reset link.</p>
-<p>🌍 # Vidosun - Downloader Sosial Media</p>
-<p>Catatan</p>
-<p>Pastikan server sudah terinstall yt-dlp.</p>
-<p>File sementara disimpan di folder static/downloads/.</p>
-<p>Folder downloads dapat dihapus secara berkala jika penuh.</p>
-<p>Support</p>
-<p>Email: womisa2008@gmail.com</p>
-
-<p>1. Clone repository ini</p>
-<p>git clone https://github.com/sta-973/vidosun.git</p>
-<p>cd vidosun</p>
+<p id="msg">Tempel link video dan tekan Enter untuk mulai download.</p>
 
 <script>
-  document.getElementById('resetBtn').addEventListener('click', function() {
-    document.getElementById('urlInput').value = '';
-  });
+const form = document.getElementById('downloadForm');
+const urlInput = document.getElementById('urlInput');
+const msg = document.getElementById('msg');
+const resetBtn = document.getElementById('resetBtn');
 
-  document.getElementById('downloadForm').addEventListener('submit', function(e) {
-    if (!document.getElementById('urlInput').value.trim()) {
-      e.preventDefault();
-      alert("Masukkan URL video!");
+form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if(!url) return alert("Masukkan URL video!");
+
+    msg.textContent = "Tunggu sebentar, video sedang diproses...";
+    try {
+        await fetch("/download", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams({url})
+        });
+        setTimeout(() => checkFile(url), 3000);
+    } catch {
+        msg.textContent = "Gagal menghubungi server!";
     }
-  });
+});
+
+async function checkFile(url){
+    try {
+        let res = await fetch(`/getfile?url=${encodeURIComponent(url)}`);
+        if(res.status === 200){
+            let data = await res.json();
+            msg.innerHTML = `Video siap <a href="${data.url}" target="_blank">klik di sini</a>`;
+        } else if(res.status === 404){
+            setTimeout(() => checkFile(url), 3000);
+        } else {
+            let data = await res.json();
+            msg.textContent = `Error: ${data.message}`;
+        }
+    } catch {
+        setTimeout(() => checkFile(url), 3000);
+    }
+}
+
+resetBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if(!url) return;
+    await fetch("/reset", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({url})
+    });
+    msg.textContent = "Link direset.";
+    urlInput.value = '';
+});
 </script>
 </body>
 </html>
-
-
-
-
