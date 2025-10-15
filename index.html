@@ -152,7 +152,7 @@
   </footer>
 
   <!-- Script download & progress -->
-  <script>
+ <script>
 document.getElementById("downloadForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("downloadBtn");
@@ -171,49 +171,56 @@ document.getElementById("downloadForm").addEventListener("submit", async functio
     let data = await res.json();
 
     if (data.status === "started") {
-      // gunakan URL sebagai task_id
-      checkProgress(url, btn);
+      checkProgress(url, btn); // gunakan URL sebagai kunci
     } else {
       alert("Gagal memulai unduhan.");
       btn.textContent = "Download";
       btn.disabled = false;
     }
-  } catch {
+  } catch (err) {
+    console.error(err);
     alert("Koneksi gagal ke server!");
     btn.textContent = "Download";
     btn.disabled = false;
   }
 });
 
-async function checkProgress(task_id, btn) {
+function checkProgress(url, btn) {
   const interval = setInterval(async () => {
-    let res = await fetch(`/progress?url=${task_id}`);
-    let data = await res.json();
+    try {
+      let res = await fetch(`/progress?url=${encodeURIComponent(url)}`);
+      let data = await res.json();
 
-    if (data.status === "downloading") {
-      btn.textContent = `Mengunduh... ${data.progress}%`;
-    } else if (data.status === "done") {
-      clearInterval(interval);
-      let fileRes = await fetch(`/getfile?url=${task_id}`);
-      let fileData = await fileRes.json();
-      if (fileData.status === "ready") {
-        btn.textContent = "Klik untuk mengunduh";
-        btn.disabled = false;
-        btn.onclick = () => window.open(fileData.url, "_blank");
-      } else {
+      if (data.status === "downloading") {
+        btn.textContent = `Mengunduh... ${data.progress}%`;
+      } else if (data.status === "done") {
+        clearInterval(interval);
+        let fileRes = await fetch(`/getfile?url=${encodeURIComponent(url)}`);
+        let fileData = await fileRes.json();
+
+        if (fileData.status === "ready") {
+          btn.textContent = "Klik untuk mengunduh";
+          btn.disabled = false;
+          btn.onclick = () => window.open(fileData.url, "_blank");
+        } else {
+          btn.textContent = "Download";
+          btn.disabled = false;
+        }
+      } else if (data.status.startsWith("error")) {
+        clearInterval(interval);
+        alert("Gagal: " + data.status);
         btn.textContent = "Download";
         btn.disabled = false;
       }
-    } else if (data.status.startsWith("error")) {
+    } catch (err) {
+      console.error(err);
       clearInterval(interval);
-      alert("Gagal: " + data.status);
+      alert("Error mengecek progres!");
       btn.textContent = "Download";
       btn.disabled = false;
     }
   }, 2000);
 }
 </script>
-
 </body>
 </html>
-
