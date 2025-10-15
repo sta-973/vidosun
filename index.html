@@ -3,118 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vidosun - DoSoMe</title>
+<title>Vidosun - Downloader Sosial Media</title>
 <style>
-body {
-    background: #111; 
+  body {
+    background: #0f0f0f;
     color: #eee;
     font-family: 'Poppins', sans-serif;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px;
+    min-height: 100vh;
     text-align: center;
-}
-.container {
-    background: #222;
-    padding: 25px;
+  }
+  header { padding: 20px; font-size: 1.8rem; }
+  .container {
+    background: #1a1a1a;
+    padding: 30px;
     border-radius: 12px;
-    max-width: 500px;
+    margin-top: 30px;
+  }
+  input[type="text"] {
     width: 100%;
-}
-input[type="text"] {
-    width: 100%;
-    padding: 12px;
+    padding: 10px;
+    margin-bottom: 15px;
     border-radius: 8px;
     border: none;
-    margin-bottom: 12px;
-}
-button {
-    padding: 12px 20px;
-    border: none;
+    outline: none;
+  }
+  button {
+    background: #ffce00;
+    color: #000;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
-    background: #ffce00;
-    font-weight: bold;
-}
-#downloadLink {
-    display: block;
-    margin-top: 15px;
-    color: #0af;
-}
-#resetBtn {
-    margin-top: 10px;
-    background: #f33;
-    color: #fff;
-}
+    margin: 5px;
+  }
 </style>
 </head>
 <body>
 
+<header>Vidosun.com - Downloader</header>
+
 <div class="container">
-<h2>Unduh Video dari Sosial Media</h2>
-<input type="text" id="urlInput" placeholder="Tempel link video di sini..." required>
-<button id="downloadBtn">Download</button>
-<a id="downloadLink" href="#" target="_blank"></a>
-<button id="resetBtn">Reset Download</button>
+  <h2>Unduh Video dari Sosial Media</h2>
+  <input type="text" id="urlInput" placeholder="Tempel link video di sini...">
+  <div>
+    <button onclick="startDownload()">Download</button>
+    <button onclick="resetDownload()">Reset Download</button>
+  </div>
 </div>
 
 <script>
-const urlInput = document.getElementById("urlInput");
-const downloadBtn = document.getElementById("downloadBtn");
-const downloadLink = document.getElementById("downloadLink");
-const resetBtn = document.getElementById("resetBtn");
+async function startDownload() {
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) return alert("Masukkan URL video!");
 
-downloadBtn.addEventListener("click", async () => {
-    const url = urlInput.value.trim();
-    if (!url) return alert("Masukkan URL video terlebih dahulu!");
-    downloadBtn.disabled = true;
-    downloadBtn.textContent = "Proses download...";
-
-    await fetch("/download", {
-        method: "POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
-        body: new URLSearchParams({url: url, format: "best"})
+  try {
+    let res = await fetch("/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ url: url, format: "best" })
     });
+    let data = await res.json();
+    if (data.status === "started") {
+      checkFile(url);
+    } else {
+      alert("Gagal memulai download!");
+    }
+  } catch {
+    alert("Koneksi gagal ke server!");
+  }
+}
 
-    const interval = setInterval(async () => {
-        let res = await fetch(`/progress?url=${encodeURIComponent(url)}`);
-        let data = await res.json();
+async function checkFile(url) {
+  const interval = setInterval(async () => {
+    let res = await fetch(`/getfile?url=${encodeURIComponent(url)}`);
+    if (res.status === 200 && res.headers.get('content-disposition')) {
+      clearInterval(interval);
+      window.location.href = `/getfile?url=${encodeURIComponent(url)}`;
+    } else if (res.status === 404) {
+      console.log("Menunggu video selesai...");
+    }
+  }, 2000);
+}
 
-        if(data.status === "done") {
-            clearInterval(interval);
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = "Download";
-            downloadLink.href = `/getfile?url=${encodeURIComponent(url)}`;
-            downloadLink.textContent = "Klik di sini untuk mengunduh video";
-        } else if(data.status === "error") {
-            clearInterval(interval);
-            alert("Gagal download");
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = "Download";
-        } else {
-            downloadBtn.textContent = `Download... ${data.progress}% (${data.eta}s tersisa)`;
-        }
-    }, 2000);
-});
-
-// Reset download
-resetBtn.addEventListener("click", async () => {
-    const url = urlInput.value.trim();
-    if(!url) return;
-    await fetch("/reset", {
-        method: "POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
-        body: new URLSearchParams({url:url})
-    });
-    downloadLink.href = "#";
-    downloadLink.textContent = "";
-    downloadBtn.disabled = false;
-    downloadBtn.textContent = "Download";
-});
+async function resetDownload() {
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) return alert("Masukkan URL video!");
+  await fetch("/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ url: url })
+  });
+  alert("Status download di-reset!");
+  document.getElementById("urlInput").value = "";
+}
 </script>
 
 </body>
 </html>
-
