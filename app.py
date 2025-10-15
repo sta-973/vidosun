@@ -1,6 +1,6 @@
-from flask import Flask, request, render_template, send_from_directory, jsonify
+from flask import Flask, request, render_template, send_from_directory, jsonify, url_for
 from flask_cors import CORS
-import subprocess, os, threading
+import subprocess, os, threading, uuid
 
 # === Inisialisasi ===
 app = Flask(__name__, template_folder='.', static_folder='static')
@@ -9,13 +9,12 @@ CORS(app)
 DOWNLOAD_FOLDER = os.path.join('static', 'downloads')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-download_status = {}  # status per URL
+download_status = {}  # status per task_id
 
 
 # === Fungsi download video ===
-def download_video(url, format_opt):
-    global download_status
-    download_status[url] = {'status': 'downloading', 'progress': 0, 'filename': None}
+def download_video(task_id, url, format_opt):
+    download_status[task_id] = {'status': 'downloading', 'progress': 0, 'filename': None}
     try:
         cmd = [
             'yt-dlp',
@@ -23,15 +22,24 @@ def download_video(url, format_opt):
             '-o', os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
             url
         ]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
 
         last_filename = None
         for line in proc.stdout:
+            line = line.strip()
+            print(line)  # log ke console Render
             # Tangkap progres
             if '[download]' in line and '%' in line:
                 try:
                     perc = float(line.split('%')[0].split()[-1])
-                    download_status[url]['progress'] = int(perc)
+                    download_status[task_id]['progress'] = int(perc)
                 except:
                     pass
             # Tangkap nama file hasil
@@ -40,12 +48,12 @@ def download_video(url, format_opt):
 
         proc.wait()
         if proc.returncode == 0:
-            download_status[url]['status'] = 'done'
-            download_status[url]['filename'] = os.path.basename(last_filename)
+            download_status[task_id]['status'] = 'done'
+            download_status[task_id]['filename'] = os.path.basename(last_filename)
         else:
-            download_status[url]['status'] = 'error'
+            download_status[task_id]['status'] = 'error'
     except Exception as e:
-        download_status[url] = {'status': f'error: {e}', 'progress': 0, 'filename': None}
+        download_status[task_id] = {'status': f'error: {e}', 'progress': 0, 'filename': None}
 
 
 # === Route utama ===
@@ -60,30 +68,31 @@ def start_download():
     url = request.form.get('url')
     fmt = request.form.get('format', 'best')
     if url:
-        threading.Thread(target=download_video, args=(url, fmt), daemon=True).start()
-        return jsonify({'status': 'started'}), 200
+        task_id = str(uuid.uuid4())
+        threading.Thread(target=download_video, args=(task_id, url, fmt), daemon=True).start()
+        return jsonify({'status': 'started', 'task_id': task_id}), 200
     return jsonify({'status': 'error', 'message': 'URL tidak ada'}), 400
 
 
 # === Pantau progres ===
 @app.route('/progress')
 def progress():
-    url = request.args.get('url')
-    if url in download_status:
-        return jsonify(download_status[url]), 200
+    task_id = request.args.get('task_id')
+    if task_id in download_status:
+        return jsonify(download_status[task_id]), 200
     return jsonify({'status': 'not_started', 'progress': 0}), 200
 
 
 # === Ambil file terakhir ===
 @app.route('/getfile')
 def get_file():
-    url = request.args.get('url')
-    info = download_status.get(url)
+    task_id = request.args.get('task_id')
+    info = download_status.get(task_id)
     if info and info.get('filename'):
         filename = info['filename']
         file_path = os.path.join(DOWNLOAD_FOLDER, filename)
         if os.path.exists(file_path):
-            public_url = f"/{file_path}"  # link publik
+            public_url = url_for('serve_download', filename=filename, _external=True)
             return jsonify({'status': 'ready', 'url': public_url}), 200
     return jsonify({'error': 'file not ready'}), 404
 
