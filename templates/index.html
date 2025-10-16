@@ -20,7 +20,7 @@
             border-radius: 10px; 
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        input[type=text] { 
+        input[type=text], input[type=file] { 
             width: 100%; 
             padding: 10px; 
             margin: 10px 0; 
@@ -68,13 +68,16 @@
 <body>
       <div class="container">
         <h2>Downloader Multi-Sosmed</h2>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" required>
+            <input type="file" name="cookies" accept=".txt">
             <button type="submit">Download</button>
         </form>
+
         {% if message %}
             <div class="message">{{ message }}</div>
         {% endif %}
+
         {% if file_path %}
             <a class="download-link" href="{{ url_for('download_file', filename=file_path.split('/')[-1]) }}">⬇️ Klik untuk download video</a>
         {% endif %}
@@ -93,20 +96,18 @@
                 <li>🎥 Tekan Enter atau Submit untuk mulai download.</li>
                 <li>📊 Tunggu hingga file dikirim ke browser Anda.</li>
                 <li>⚡ Gunakan tombol silang di kanan input untuk reset link.</li>
+                <li>🗂 Jika video membutuhkan login, upload cookies file dari browser.</li>
             </ul>
             <p>🌍 ## Support
-              Email: womisa2008@gmail.com</p>
+                Email: womisa2008@gmail.com</p>
+            </p>
         </div>
       </div>
 
     <script>
         function toggleReadme() {
             const content = document.querySelector('.readme-content');
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
+            content.style.display = (content.style.display === "block") ? "none" : "block";
         }
     </script>
 </body>
