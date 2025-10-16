@@ -1,59 +1,62 @@
-from flask import Flask, request, send_file, render_template
-import os
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import subprocess
-import glob
-import time
+import os
+import uuid
 
-app = Flask(__name__, template_folder='.', static_folder='static')
+app = Flask(__name__)
+CORS(app)
 
-DOWNLOAD_FOLDER = os.path.join('static', 'downloads')
+# Folder download (otomatis dibuat kalau belum ada)
+DOWNLOAD_FOLDER = os.path.join(os.getcwd(), "downloads")
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-def sanitize_filename(name):
-    return "".join(c for c in name if c.isalnum() or c in " ._-").strip()
-
 @app.route('/')
-def index():
+def home():
     return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
-def download():
-    url = request.form.get('url')
+def download_video():
+    data = request.get_json()
+    url = data.get('url')
+
     if not url:
-        return "URL tidak ditemukan!", 400
+        return jsonify({'success': False, 'error': 'URL kosong!'})
 
     try:
-        # Hapus file lama dulu
-        files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
-        for f in files:
-            os.remove(f)
+        # Nama file unik
+        unique_name = str(uuid.uuid4()) + ".mp4"
+        output_path = os.path.join(DOWNLOAD_FOLDER, unique_name)
 
-        # Gunakan python -m yt_dlp untuk kestabilan
-        output_template = os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s')
+        # Jalankan yt-dlp melalui python -m agar pasti terdeteksi
         cmd = [
-            'python', '-m', 'yt_dlp',
-            '-o', output_template,
+            "python", "-m", "yt_dlp",
+            "-f", "b",
+            "-o", output_path,
             url
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        subprocess.run(cmd, check=True)
 
-        if proc.returncode != 0:
-            print(proc.stderr)
-            return f"Gagal download: {proc.stderr}", 500
+        # Pastikan file berhasil diunduh
+        if not os.path.exists(output_path):
+            return jsonify({'success': False, 'error': 'File tidak ditemukan setelah unduh.'})
 
-        # Ambil file terbaru
-        files = glob.glob(os.path.join(DOWNLOAD_FOLDER, '*'))
-        if not files:
-            return "Gagal download: file tidak ditemukan", 500
+        # Kirim link unduhan (Render akan menyediakan URL publik)
+        file_url = f"/getfile/{unique_name}"
+        return jsonify({'success': True, 'url': file_url})
 
-        latest_file = max(files, key=os.path.getctime)
-        filename = sanitize_filename(os.path.basename(latest_file))
-        return send_file(latest_file, as_attachment=True, download_name=filename)
-
+    except subprocess.CalledProcessError as e:
+        return jsonify({'success': False, 'error': f'Gagal download: {e}'})
     except Exception as e:
-        print(e)
-        return f"Gagal download: {e}", 500
+        return jsonify({'success': False, 'error': str(e)})
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+@app.route('/getfile/<filename>')
+def get_file(filename):
+    file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+    if os.path.exists(file_path):
+        return app.send_static_file(file_path)
+    else:
+        return "File tidak ditemukan", 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
