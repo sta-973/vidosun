@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Downloader Multi-Sosmed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f9f9f9, #e3f2fd);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 450px;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #1976d2;
+    }
+    .input-box {
+      position: relative;
+    }
+    input {
+      width: 100%;
+      padding: 12px 40px 12px 12px;
+      border: 2px solid #1976d2;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+    }
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #999;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Downloader Multi-Sosmed</h1>
+    <div class="input-box">
+      <input type="text" id="url" placeholder="Tempelkan URL video..." />
+      <span class="clear-btn" onclick="document.getElementById('url').value=''">&times;</span>
+    </div>
+    <button onclick="downloadVideo()">Download</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    async function downloadVideo() {
+      const url = document.getElementById("url").value.trim();
+      const result = document.getElementById("result");
+
+      if (!url) {
+        result.innerHTML = "Masukkan URL terlebih dahulu.";
+        return;
+      }
+
+      result.innerHTML = "Sedang memproses... ⏳";
+
+      try {
+        const response = await fetch("/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          result.innerHTML = `<a href="${data.url}" target="_blank">Klik untuk download file 🎬</a>`;
+        } else {
+          result.innerHTML = "Gagal download: " + data.error;
+        }
+      } catch (err) {
+        result.innerHTML = "Terjadi kesalahan: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
