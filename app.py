@@ -1,4 +1,4 @@
-from flask import Flask, render_templates, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import subprocess
 import os
@@ -13,7 +13,7 @@ os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def home():
-    return render_templates('index.html')
+    return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
 def download_video():
@@ -60,5 +60,6 @@ def get_file(filename):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
