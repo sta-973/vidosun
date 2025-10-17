@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# Folder download
+# Folder untuk menyimpan hasil download
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
@@ -20,6 +20,8 @@ def home():
                 file_path = hasil
             else:
                 message = hasil
+        else:
+            message = "Masukkan URL terlebih dahulu."
     return render_template('index.html', message=message, file_path=file_path)
 
 @app.route('/download/<filename>')
@@ -29,5 +31,9 @@ def download_file(filename):
         return send_file(path, as_attachment=True)
     return "File tidak ditemukan", 404
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Gunakan host='0.0.0.0' agar bisa diakses publik
+    # dan port dari environment variable (misal Render atau Railway)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
