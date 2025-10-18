@@ -19,7 +19,7 @@
             border-radius: 10px; 
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        input[type=text], input[type=file] { 
+        input[type=text] { 
             width: 100%; 
             padding: 10px; 
             margin: 10px 0; 
@@ -35,11 +35,26 @@
             border: none; 
             border-radius: 5px; 
             cursor: pointer; 
+            margin: 5px 3px;
         }
         button:hover { background: #0056b3; }
         .message { color: #ff6b6b; margin: 10px 0; }
         .download-link { margin-top: 15px; display: block; color: #00bfff; text-decoration: none; }
         .download-link:hover { text-decoration: underline; }
+
+        .video-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .video-preview img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .video-title {
+            font-size: 16px;
+            margin-top: 8px;
+            color: #00bfff;
+        }
 
         .readme { 
             background: #2b2b2b; 
@@ -62,7 +77,6 @@
         ul { padding-left: 20px; }
         li { margin-bottom: 5px; }
 
-        /* === About Section === */
         .about {
             margin-top: 25px;
             background: #2b2b2b;
@@ -77,19 +91,37 @@
         .about p {
             line-height: 1.6;
         }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 13px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Downloader Multi-Sosmed</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" required>
-            <input type="file" name="cookies" accept=".txt">
-            <button type="submit">Download</button>
+        <form method="POST">
+            <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" value="{{ url or '' }}" required>
+            
+            <!-- Dua tombol: Preview & Download -->
+            <button type="submit" name="action" value="preview">🔍 Tampilkan Info</button>
+            {% if thumbnail_url %}
+                <button type="submit" name="action" value="download">⬇️ Download</button>
+            {% endif %}
         </form>
 
         {% if message %}
             <div class="message">{{ message }}</div>
+        {% endif %}
+
+        {% if thumbnail_url %}
+        <div class="video-preview">
+            <img src="{{ thumbnail_url }}" alt="Thumbnail Video">
+            <div class="video-title">{{ video_title }}</div>
+        </div>
         {% endif %}
 
         {% if file_path %}
@@ -97,26 +129,22 @@
         {% endif %}
     </div>
 
-    <!-- Collapsible README -->
     <div class="container readme">
         <h3 onclick="toggleReadme()">🎬 Vidosun Downloader (Klik untuk info)</h3>
         <div class="readme-content">
-            <p>Selamat datang di Vidosun Downloader — aplikasi web sederhana untuk mengunduh video dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
+            <p>Selamat datang di <strong>Vidosun Downloader</strong> — aplikasi web sederhana untuk mengunduh video dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
             <p>🌐 Website Resmi: <a href="https://vidosun.com" target="_blank">https://vidosun.com</a></p>
             <h4>🚀 Fitur Utama</h4>
             <ul>
                 <li>✅ Salin link video dari sosial media.</li>
                 <li>🎵 Tempelkan link ke kolom input di halaman utama.</li>
-                <li>🎥 Tekan Enter atau Submit untuk mulai download.</li>
-                <li>📊 Tunggu hingga file dikirim ke browser Anda.</li>
-                <li>⚡ Gunakan tombol silang di kanan input untuk reset link.</li>
-                <li>🗂 Jika video membutuhkan login, upload cookies file dari browser.</li>
+                <li>🎥 Tekan <b>Tampilkan Info</b> untuk preview sebelum download.</li>
+                <li>⬇️ Klik <b>Download</b> untuk mulai mengunduh video.</li>
             </ul>
-            <p>🌍 Support: womisa2008@gmail.com</p>
+            <p>📧 Support: womisa2008@gmail.com</p>
         </div>
     </div>
 
-    <!-- About Section -->
     <div class="container about">
         <h3>📖 About Vidosun</h3>
         <p><strong>English:</strong><br>
@@ -129,6 +157,8 @@
         Vidosun adalah platform pengunduh dan berbagi media yang aman serta mudah digunakan. Pengguna dapat membuat dan mengunduh kartu video, media digital, dan template dengan cepat.<br><br>
         Kami memastikan seluruh konten di Vidosun bersifat aman, ramah keluarga, dan tidak mengandung materi dewasa ataupun bajakan. Tujuan kami adalah mendukung kreator digital serta pembelajar online dalam menciptakan karya dengan mudah.</p>
     </div>
+
+    <footer>© 2025 Vidosun.com — Built with ❤️ using Flask & yt-dlp</footer>
 
     <script>
         function toggleReadme() {
