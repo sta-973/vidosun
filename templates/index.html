@@ -5,7 +5,6 @@
     <title>Downloader Multi-Sosmed</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
-        /* === Dark Mode Styles === */
         body { 
             font-family: Arial, sans-serif; 
             background: #121212; 
@@ -42,7 +41,6 @@
         .download-link { margin-top: 15px; display: block; color: #00bfff; text-decoration: none; }
         .download-link:hover { text-decoration: underline; }
 
-        /* === Collapsible README === */
         .readme { 
             background: #2b2b2b; 
             border-left: 4px solid #007BFF; 
@@ -63,10 +61,26 @@
         .readme-content a:hover { text-decoration: underline; }
         ul { padding-left: 20px; }
         li { margin-bottom: 5px; }
+
+        /* === About Section === */
+        .about {
+            margin-top: 25px;
+            background: #2b2b2b;
+            border-left: 4px solid #00bfff;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .about h3 {
+            color: #00bfff;
+            margin-top: 0;
+        }
+        .about p {
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
-      <div class="container">
+    <div class="container">
         <h2>Downloader Multi-Sosmed</h2>
         <form method="POST" enctype="multipart/form-data">
             <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" required>
@@ -81,10 +95,10 @@
         {% if file_path %}
             <a class="download-link" href="{{ url_for('download_file', filename=file_path.split('/')[-1]) }}">⬇️ Klik untuk download video</a>
         {% endif %}
-      </div>
+    </div>
 
-      <!-- Collapsible README / Info tambahan -->
-      <div class="container readme">
+    <!-- Collapsible README -->
+    <div class="container readme">
         <h3 onclick="toggleReadme()">🎬 Vidosun Downloader (Klik untuk info)</h3>
         <div class="readme-content">
             <p>Selamat datang di Vidosun Downloader — aplikasi web sederhana untuk mengunduh video dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
@@ -98,11 +112,23 @@
                 <li>⚡ Gunakan tombol silang di kanan input untuk reset link.</li>
                 <li>🗂 Jika video membutuhkan login, upload cookies file dari browser.</li>
             </ul>
-            <p>🌍 ## Support
-                Email: womisa2008@gmail.com</p>
-            </p>
+            <p>🌍 Support: womisa2008@gmail.com</p>
         </div>
-      </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="container about">
+        <h3>📖 About Vidosun</h3>
+        <p><strong>English:</strong><br>
+        Vidosun is a safe and user-friendly downloader and media sharing platform that helps users create and download customized video cards, digital media, and templates. Our goal is to make digital creation simple and accessible for everyone.<br><br>
+        We provide clean, family-friendly content, and do not host or link to adult or pirated materials. Vidosun is developed for educational and creative purposes to support online creators and digital learners.</p>
+
+        <hr style="border: none; border-top: 1px solid #333; margin: 15px 0;">
+
+        <p><strong>Bahasa Indonesia:</strong><br>
+        Vidosun adalah platform pengunduh dan berbagi media yang aman serta mudah digunakan. Pengguna dapat membuat dan mengunduh kartu video, media digital, dan template dengan cepat.<br><br>
+        Kami memastikan seluruh konten di Vidosun bersifat aman, ramah keluarga, dan tidak mengandung materi dewasa ataupun bajakan. Tujuan kami adalah mendukung kreator digital serta pembelajar online dalam menciptakan karya dengan mudah.</p>
+    </div>
 
     <script>
         function toggleReadme() {
