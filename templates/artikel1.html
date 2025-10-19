@@ -2,21 +2,62 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cara Download YouTube - Vidosun</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: #e0e0e0; padding: 30px; }
-        .container { max-width: 700px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        h1, h2 { color: #00bfff; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #121212; 
+            color: #e0e0e0; 
+            padding: 30px; 
+        }
+        .container { 
+            width: 90%;
+            max-width: 700px; 
+            margin: auto; 
+            background: #1e1e1e; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+        }
+        h1, h2 { color: #00bfff; margin-top: 0; }
         p, li { line-height: 1.6; }
-        ul { padding-left: 20px; }
+        ol, ul { padding-left: 20px; }
         a { color: #00bfff; text-decoration: none; }
         a:hover { text-decoration: underline; }
         footer { text-align: center; margin-top: 30px; font-size: 13px; color: #666; }
+
+        /* Tombol Back */
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-back:hover { background: #0056b3; }
+
+        /* Responsive untuk layar kecil */
+        @media (max-width: 480px) {
+            body { padding: 15px; font-size: 14px; }
+            .container { padding: 15px; }
+            h1 { font-size: 20px; }
+            h2 { font-size: 18px; }
+            ol, ul { padding-left: 15px; }
+            footer { font-size: 12px; }
+        }
+
+        img { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
     <div class="container">
+        <button class="btn-back" onclick="window.history.back()">←</button>
         <h1>📌 Cara Download Video YouTube</h1>
         <p>Berikut langkah mudah untuk mengunduh video YouTube menggunakan <strong>Vidosun Downloader</strong>:</p>
         <ol>
@@ -28,6 +69,7 @@
         </ol>
         <p>Tips: Gunakan video yang bersifat publik dan untuk keperluan edukasi atau pribadi.</p>
     </div>
+
     <footer>
         © 2025 Vidosun.com — Built with ❤️ using Flask & yt-dlp<br>
         <a href="{{ url_for('privacy') }}">Privacy Policy</a> | 
