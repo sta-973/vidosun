@@ -9,6 +9,8 @@ app = Flask(__name__)
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+# Daftar artikel yang tersedia
+ALLOWED_ARTICLES = ['artikel1', 'artikel2', 'artikel3']
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -63,6 +65,24 @@ def download_file(filename):
     if os.path.exists(path):
         return send_file(path, as_attachment=True)
     return "File tidak ditemukan", 404
+
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+
+@app.route('/artikel/<nama>')
+def artikel(nama):
+    if nama in ALLOWED_ARTICLES:
+        return render_template(f"{nama}.html")
+    else:
+        return "Artikel tidak ditemukan", 404
 
 
 if __name__ == '__main__':
