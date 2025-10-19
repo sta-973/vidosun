@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Downloader Multi-Sosmed</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -38,66 +38,22 @@
             margin: 5px 3px;
         }
         button:hover { background: #0056b3; }
-        .message { color: #ff6b6b; margin: 10px 0; }
         .download-link { margin-top: 15px; display: block; color: #00bfff; text-decoration: none; }
         .download-link:hover { text-decoration: underline; }
-
-        .video-preview {
-            margin-top: 15px;
-            text-align: center;
-        }
-        .video-preview img {
-            width: 100%;
-            border-radius: 8px;
-        }
-        .video-title {
-            font-size: 16px;
-            margin-top: 8px;
-            color: #00bfff;
-        }
-
-        .readme { 
-            background: #2b2b2b; 
-            border-left: 4px solid #007BFF; 
-            padding: 10px 15px; 
-            margin-top: 20px; 
-            border-radius: 5px; 
-        }
-        .readme h3 { 
-            margin: 0; 
-            color: #00bfff; 
-            cursor: pointer; 
-        }
-        .readme-content { 
-            display: none; 
-            margin-top: 10px; 
-        }
+        .video-preview { margin-top: 15px; text-align: center; }
+        .video-preview img { width: 100%; border-radius: 8px; }
+        .video-title { font-size: 16px; margin-top: 8px; color: #00bfff; }
+        .readme { background: #2b2b2b; border-left: 4px solid #007BFF; padding: 10px 15px; margin-top: 20px; border-radius: 5px; }
+        .readme h3 { margin: 0; color: #00bfff; cursor: pointer; }
+        .readme-content { display: block; margin-top: 10px; }
         .readme-content a { color: #00bfff; text-decoration: none; }
         .readme-content a:hover { text-decoration: underline; }
         ul { padding-left: 20px; }
         li { margin-bottom: 5px; }
-
-        .about {
-            margin-top: 25px;
-            background: #2b2b2b;
-            border-left: 4px solid #00bfff;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .about h3 {
-            color: #00bfff;
-            margin-top: 0;
-        }
-        .about p {
-            line-height: 1.6;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 13px;
-            color: #666;
-        }
+        .about { margin-top: 25px; background: #2b2b2b; border-left: 4px solid #00bfff; padding: 15px; border-radius: 5px; }
+        .about h3 { color: #00bfff; margin-top: 0; }
+        .about p { line-height: 1.6; }
+        footer { text-align: center; margin-top: 30px; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
@@ -108,38 +64,25 @@
             <strong>YouTube</strong>, <strong>Instagram</strong>, <strong>TikTok</strong>, dan <strong>Facebook</strong>.
             Semua layanan gratis dan tanpa perlu login. Gunakan dengan bijak untuk keperluan edukasi dan kreatif.
         </p>
-    
+
         <hr style="border: none; border-top: 1px solid #333; margin: 15px 0;">
-    
+
         <h2>Downloader Multi-Sosmed</h2>
-        <form method="POST">
-            <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" value="{{ url or '' }}" required>
-            
-            <!-- Dua tombol: Preview & Download -->
-            <button type="submit" name="action" value="preview">🔍 Tampilkan Info</button>
-            {% if thumbnail_url %}
-                <button type="submit" name="action" value="download">⬇️ Download</button>
-            {% endif %}
+        <form>
+            <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" required>
+            <button type="submit">🔍 Tampilkan Info</button>
+            <button type="button">⬇️ Download</button>
         </form>
-    
-        {% if message %}
-            <div class="message">{{ message }}</div>
-        {% endif %}
-    
-        {% if thumbnail_url %}
+
         <div class="video-preview">
-            <img src="{{ thumbnail_url }}" alt="Thumbnail Video">
-            <div class="video-title">{{ video_title }}</div>
+            <img src="https://via.placeholder.com/480x270.png?text=Thumbnail+Video" alt="Thumbnail Video">
+            <div class="video-title">Contoh Video: Belajar GitHub Dasar</div>
+            <a class="download-link" href="#">⬇️ Klik untuk download video</a>
         </div>
-        {% endif %}
-    
-        {% if file_path %}
-            <a class="download-link" href="{{ url_for('download_file', filename=file_path.split('/')[-1]) }}">⬇️ Klik untuk download video</a>
-        {% endif %}
     </div>
 
     <div class="container readme">
-        <h3 onclick="toggleReadme()">🎬 Vidosun Downloader (Klik untuk info)</h3>
+        <h3>🎬 Vidosun Downloader (Info Lengkap)</h3>
         <div class="readme-content">
             <p>Selamat datang di <strong>Vidosun Downloader</strong> — aplikasi web sederhana untuk mengunduh video dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
             <p>🌐 Website Resmi: <a href="https://vidosun.com" target="_blank">https://vidosun.com</a></p>
@@ -157,23 +100,12 @@
     <div class="container about">
         <h3>📖 About Vidosun</h3>
         <p><strong>English:</strong><br>
-        Vidosun is a safe and user-friendly downloader and media sharing platform that helps users create and download customized video cards, digital media, and templates. Our goal is to make digital creation simple and accessible for everyone.<br><br>
-        We provide clean, family-friendly content, and do not host or link to adult or pirated materials. Vidosun is developed for educational and creative purposes to support online creators and digital learners.</p>
-
-        <hr style="border: none; border-top: 1px solid #333; margin: 15px 0;">
+        Vidosun is a safe and user-friendly downloader and media sharing platform that helps users create and download customized video cards, digital media, and templates. Our goal is to make digital creation simple and accessible for everyone.</p>
 
         <p><strong>Bahasa Indonesia:</strong><br>
-        Vidosun adalah platform pengunduh dan berbagi media yang aman serta mudah digunakan. Pengguna dapat membuat dan mengunduh kartu video, media digital, dan template dengan cepat.<br><br>
-        Kami memastikan seluruh konten di Vidosun bersifat aman, ramah keluarga, dan tidak mengandung materi dewasa ataupun bajakan. Tujuan kami adalah mendukung kreator digital serta pembelajar online dalam menciptakan karya dengan mudah.</p>
+        Vidosun adalah platform pengunduh dan berbagi media yang aman serta mudah digunakan. Pengguna dapat membuat dan mengunduh kartu video, media digital, dan template dengan cepat. Semua konten aman dan ramah keluarga.</p>
     </div>
 
-    <footer>© 2025 Vidosun.com — Built with ❤️ using Flask & yt-dlp</footer>
-
-    <script>
-        function toggleReadme() {
-            const content = document.querySelector('.readme-content');
-            content.style.display = (content.style.display === "block") ? "none" : "block";
-        }
-    </script>
+    <footer>© 2025 Vidosun.com — Built with ❤️</footer>
 </body>
 </html>
