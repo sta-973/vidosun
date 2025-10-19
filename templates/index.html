@@ -2,61 +2,115 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Downloader Multi-Sosmed</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #121212; 
-            color: #e0e0e0; 
-            padding: 30px; 
-        }
-        .container { 
-            max-width: 500px; 
-            margin: auto; 
-            background: #1e1e1e; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        input[type=text] { 
-            width: 100%; 
-            padding: 10px; 
-            margin: 10px 0; 
-            border-radius: 5px; 
-            border: 1px solid #555; 
-            background: #2b2b2b; 
+        /* BODY */
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
             color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
         }
-        button { 
-            padding: 10px 20px; 
-            background: #007BFF; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
+
+        /* CONTAINER */
+        .container {
+            max-width: 500px;
+            width: 90%;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        /* INPUT & BUTTON */
+        input[type=text] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #2b2b2b;
+            color: #e0e0e0;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             margin: 5px 3px;
+            font-size: 16px;
         }
         button:hover { background: #0056b3; }
+
+        /* MESSAGES */
         .message { color: #ff6b6b; margin: 10px 0; }
-        .download-link { margin-top: 15px; display: block; color: #00bfff; text-decoration: none; }
+
+        /* DOWNLOAD LINK */
+        .download-link {
+            margin-top: 15px;
+            display: block;
+            color: #00bfff;
+            text-decoration: none;
+            word-break: break-word;
+        }
         .download-link:hover { text-decoration: underline; }
-        .video-preview { margin-top: 15px; text-align: center; }
-        .video-preview img { width: 100%; border-radius: 8px; }
+
+        /* VIDEO PREVIEW */
+        .video-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .video-preview img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
         .video-title { font-size: 16px; margin-top: 8px; color: #00bfff; }
-        .readme { background: #2b2b2b; border-left: 4px solid #007BFF; padding: 10px 15px; margin-top: 20px; border-radius: 5px; }
+
+        /* README & ABOUT */
+        .readme, .about {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .readme { background: #2b2b2b; border-left: 4px solid #007BFF; }
         .readme h3 { margin: 0; color: #00bfff; cursor: pointer; }
         .readme-content { display: none; margin-top: 10px; }
         .readme-content a { color: #00bfff; text-decoration: none; }
         .readme-content a:hover { text-decoration: underline; }
-        ul { padding-left: 20px; }
-        li { margin-bottom: 5px; }
-        .about { margin-top: 25px; background: #2b2b2b; border-left: 4px solid #00bfff; padding: 15px; border-radius: 5px; }
+
+        .about { background: #2b2b2b; border-left: 4px solid #00bfff; }
         .about h3 { color: #00bfff; margin-top: 0; }
         .about p { line-height: 1.6; }
-        footer { text-align: center; margin-top: 30px; font-size: 13px; color: #666; }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 13px;
+            color: #666;
+        }
         footer a { color: #00bfff; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
+
+        /* MEDIA QUERY HP */
+        @media (max-width: 480px) {
+            body { padding: 15px; }
+            input[type=text], button { font-size: 14px; }
+            .video-title { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
