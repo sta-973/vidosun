@@ -102,6 +102,15 @@
 </head>
 <body>
     <div class="container">
+        <h1>🎬 Selamat Datang di Vidosun Downloader</h1>
+        <p style="font-size:14px; line-height:1.6; color:#ccc;">
+            Aplikasi web sederhana untuk mengunduh video dan audio dari berbagai platform sosial media seperti 
+            <strong>YouTube</strong>, <strong>Instagram</strong>, <strong>TikTok</strong>, dan <strong>Facebook</strong>.
+            Semua layanan gratis dan tanpa perlu login. Gunakan dengan bijak untuk keperluan edukasi dan kreatif.
+        </p>
+    
+        <hr style="border: none; border-top: 1px solid #333; margin: 15px 0;">
+    
         <h2>Downloader Multi-Sosmed</h2>
         <form method="POST">
             <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" value="{{ url or '' }}" required>
@@ -112,18 +121,18 @@
                 <button type="submit" name="action" value="download">⬇️ Download</button>
             {% endif %}
         </form>
-
+    
         {% if message %}
             <div class="message">{{ message }}</div>
         {% endif %}
-
+    
         {% if thumbnail_url %}
         <div class="video-preview">
             <img src="{{ thumbnail_url }}" alt="Thumbnail Video">
             <div class="video-title">{{ video_title }}</div>
         </div>
         {% endif %}
-
+    
         {% if file_path %}
             <a class="download-link" href="{{ url_for('download_file', filename=file_path.split('/')[-1]) }}">⬇️ Klik untuk download video</a>
         {% endif %}
