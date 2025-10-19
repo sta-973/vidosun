@@ -3,66 +3,71 @@ import sys
 import subprocess
 import yt_dlp
 
-DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
+# Folder download
+BASE_DIR = os.path.dirname(__file__)
+DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-
 def auto_update_yt_dlp():
-    """Update yt-dlp otomatis untuk mengikuti perubahan situs"""
+    """Update yt-dlp otomatis"""
     try:
         print("🔄 Memeriksa pembaruan yt-dlp...")
         subprocess.run([sys.executable, "-m", "yt_dlp", "-U"], check=False)
     except Exception as e:
         print(f"⚠️ Gagal update yt-dlp: {e}")
 
-
-def get_video_info(url: str):
-    """Ambil info video tanpa download (judul + thumbnail)"""
-    try:
-        ydl_opts = {'quiet': True, 'noplaylist': True}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            return {
-                'title': info.get('title'),
-                'thumbnail': info.get('thumbnail'),
-                'uploader': info.get('uploader'),
-                'duration': info.get('duration'),
-            }
-    except Exception as e:
-        print(f"⚠️ Gagal ambil info: {e}")
-        return None
-
-
 def download_video(url: str):
-    """Fungsi utama untuk mengunduh video dari berbagai platform"""
+    """Download video + audio DASH otomatis dan merge jadi MP4"""
     auto_update_yt_dlp()
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+    ydl_opts = {
+        "format": "bestvideo+bestaudio/best",  # ambil video + audio terbaik
+        "merge_output_format": "mp4",          # gabungkan jadi mp4
+        "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
+        "noplaylist": True,
+        "quiet": False,
+        "no_warnings": False,
+        "ignoreerrors": True,
+    }
 
     try:
-        ydl_opts = {
-            'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
-            'merge_output_format': 'mp4',
-            'noplaylist': True,
-            'quiet': True,
-            'no_warnings': True,
-        }
-
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            print(f"⬇️ Mengunduh: {url}")
+            print(f"\n⬇️ Mengunduh: {url}")
             info = ydl.extract_info(url, download=True)
+            
+            if not info:
+                raise Exception("Tidak bisa ambil info video (mungkin URL tidak valid).")
+
             filename = ydl.prepare_filename(info)
-            print(f"✅ Berhasil: {filename}")
+            if not os.path.exists(filename):
+                # cari file mirip
+                folder_files = os.listdir(DOWNLOAD_DIR)
+                match_files = [f for f in folder_files if info.get("title", "")[:15] in f]
+                if match_files:
+                    filename = os.path.join(DOWNLOAD_DIR, match_files[0])
+                else:
+                    raise Exception(f"File hasil tidak ditemukan: {filename}")
+
+            print(f"\n✅ Berhasil disimpan sebagai: {filename}")
+
+            # buka folder hasil
+            try:
+                if sys.platform == "win32":
+                    os.startfile(DOWNLOAD_DIR)
+                elif sys.platform == "darwin":
+                    subprocess.run(["open", DOWNLOAD_DIR])
+                else:
+                    subprocess.run(["xdg-open", DOWNLOAD_DIR])
+            except Exception as open_err:
+                print(f"⚠️ Gagal membuka folder: {open_err}")
+
             return filename
 
     except Exception as e:
-        error_text = str(e).lower()
+        print(f"❌ ERROR DETAIL: {e}")
+        return {"error": str(e)}
 
-        if "sign in" in error_text or "login required" in error_text:
-            return "⚠️ Video ini memerlukan login (private atau dibatasi platform)."
-        elif "rate-limit" in error_text:
-            return "⚠️ Terlalu banyak permintaan. Tunggu beberapa menit lalu coba lagi."
-        elif "cannot parse data" in error_text:
-            return "⚠️ Situs ini baru mengubah formatnya. Tunggu update yt-dlp selanjutnya."
-        elif "unavailable" in error_text or "404" in error_text:
-            return "⚠️ Video tidak tersedia (mungkin dihapus atau di-private)."
-        else:
-            return f"❌ Gagal download: {e}"
+if __name__ == "__main__":
+    url = input("Masukkan URL video YouTube: ")
+    download_video(url)
