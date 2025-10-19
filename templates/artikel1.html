@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Cara Download YouTube - Vidosun</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #e0e0e0; padding: 30px; }
+        .container { max-width: 700px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #00bfff; }
+        p, li { line-height: 1.6; }
+        ul { padding-left: 20px; }
+        a { color: #00bfff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { text-align: center; margin-top: 30px; font-size: 13px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📌 Cara Download Video YouTube</h1>
+        <p>Berikut langkah mudah untuk mengunduh video YouTube menggunakan <strong>Vidosun Downloader</strong>:</p>
+        <ol>
+            <li>Buka <a href="{{ url_for('home') }}">Vidosun Downloader</a>.</li>
+            <li>Salin URL video YouTube yang ingin diunduh.</li>
+            <li>Tempelkan URL tersebut ke kolom input di halaman utama.</li>
+            <li>Tekan tombol <b>Tampilkan Info</b> untuk melihat preview video.</li>
+            <li>Jika sudah yakin, klik <b>Download</b> untuk mengunduh video.</li>
+        </ol>
+        <p>Tips: Gunakan video yang bersifat publik dan untuk keperluan edukasi atau pribadi.</p>
+    </div>
+    <footer>
+        © 2025 Vidosun.com — Built with ❤️ using Flask & yt-dlp<br>
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a> | 
+        <a href="{{ url_for('terms') }}">Terms of Service</a> | 
+        <a href="{{ url_for('home') }}">Home</a>
+    </footer>
+</body>
+</html>
