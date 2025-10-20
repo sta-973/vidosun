@@ -97,4 +97,3 @@ if __name__ == "__main__":
     # FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe" 
     url = input("Masukkan URL video: ")
     print(download_video(url))
-
