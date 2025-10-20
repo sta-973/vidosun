@@ -51,6 +51,41 @@ footer a:hover { text-decoration: underline; }
 @media (max-width: 480px) { body { padding: 15px; } input[type=text], button { font-size: 14px; } .video-title { font-size: 14px; } }
 </style>
 
+<!-- PopAds Standard Adcode -->
+<script type="text/javascript" data-cfasync="false">
+    /*<![CDATA[/* */
+    (function(){
+        var a=window,m="c7e6610135b2f21c5f967ea8ea89766b",
+        q=[["siteId",300*943*784-216545761],["minBid",0],["popundersPerIP","0"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],
+        i=["d3d3LnZpc2FyaW9tZWRpYS5jb20vUEdva1ovR0VIUS9vY3JlYXRpdmUubWluLmpz","ZDEzazdwcmF4MXlpMDQuY2xvdWRmcm9udC5uZXQvbGhwcm9zZS1odG1sNS5qcw=="],
+        t=-1,y,h,z=function(){
+            clearTimeout(h);
+            t++;
+            if(i[t]&&!(1786847109000<(new Date).getTime()&&1<t)){
+                y=a.document.createElement("script");
+                y.type="text/javascript";
+                y.async=!0;
+                var s=a.document.getElementsByTagName("script")[0];
+                y.src="https://"+atob(i[t]);
+                y.crossOrigin="anonymous";
+                y.onerror=z;
+                y.onload=function(){
+                    clearTimeout(h);
+                    a[m.slice(0,16)+m.slice(0,16)]||z()
+                };
+                h=setTimeout(z,5E3);
+                s.parentNode.insertBefore(y,s)
+            }
+        };
+        if(!a[m]){
+            try{Object.freeze(a[m]=q)}catch(e){}
+            z()
+        }
+    })();
+    /*]]>/* */
+    </script>
+    <!-- End PopAds Code -->
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
