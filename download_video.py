@@ -1,6 +1,7 @@
 import os
 import sys
 import yt_dlp
+import subprocess # <--- TAMBAHKAN INI
 
 # Folder download
 BASE_DIR = os.path.dirname(__file__)
@@ -96,3 +97,4 @@ if __name__ == "__main__":
     # FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe" 
     url = input("Masukkan URL video: ")
     print(download_video(url))
+
