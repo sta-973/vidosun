@@ -5,25 +5,23 @@ import yt_dlp
 
 app = Flask(__name__)
 
-# Folder untuk menyimpan hasil download
+# Folder download
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# File cookies untuk YouTube login
-COOKIE_FILE = os.path.join(os.path.dirname(__file__), "youtube_cookies.txt")
+# File cookies YouTube
+COOKIE_FILE = os.path.join(os.path.dirname(__file__), "youtube.com_cookies.txt")
 
-# Daftar artikel yang tersedia
+# Daftar artikel
 ALLOWED_ARTICLES = ['artikel1', 'artikel2', 'artikel3']
 
 def get_video_info(url):
-    """
-    Mengambil info video menggunakan yt-dlp dengan cookies
-    """
+    """Ambil info video dengan cookies"""
     ydl_opts = {
         'format': 'best',
         'quiet': True,
         'noplaylist': True,
-        'cookies': COOKIE_FILE  # pakai cookies YouTube
+        'cookies': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -33,8 +31,6 @@ def get_video_info(url):
                 'thumbnail': info.get('thumbnail'),
                 'url': info.get('webpage_url')
             }
-    except yt_dlp.utils.DownloadError as e:
-        return {'error': str(e)}
     except Exception as e:
         return {'error': str(e)}
 
@@ -63,7 +59,7 @@ def home():
                         video_title = info['title']
 
                 elif action == "download":
-                    hasil = download_video(url, cookies=COOKIE_FILE)  # pastikan download_video menerima cookies
+                    hasil = download_video(url)
                     if isinstance(hasil, dict) and "error" in hasil:
                         message = hasil["error"]
                     elif isinstance(hasil, str) and os.path.isfile(hasil):
@@ -102,8 +98,7 @@ def terms():
 def artikel(nama):
     if nama in ALLOWED_ARTICLES:
         return render_template(f"{nama}.html")
-    else:
-        return "Artikel tidak ditemukan", 404
+    return "Artikel tidak ditemukan", 404
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
