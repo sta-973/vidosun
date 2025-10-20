@@ -8,12 +8,18 @@ BASE_DIR = os.path.dirname(__file__)
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# File cookies YouTube
-COOKIES_FILE = os.path.join(BASE_DIR, "youtube.com_cookies.txt")
-
-# Lokasi FFmpeg (ubah sesuai tempat ffmpeg.exe di PC kamu)
+# Lokasi FFmpeg (ubah sesuai path di PC kamu)
 FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe"  # Windows
 # FFMPEG_PATH = "/usr/bin/ffmpeg"          # Linux / macOS
+
+# Mapping cookies per platform
+COOKIES_MAP = {
+    "youtube.com": os.path.join(BASE_DIR, "youtube.com_cookies.txt"),
+    "instagram.com": os.path.join(BASE_DIR, "instagram.com_cookies.txt"),
+    "facebook.com": os.path.join(BASE_DIR, "facebook.com_cookies.txt"),
+    "threads.net": os.path.join(BASE_DIR, "threads.com_cookies.txt"),
+    "tiktok.com": os.path.join(BASE_DIR, "tiktok.com_cookies.txt")
+}
 
 def auto_update_yt_dlp():
     """Update yt-dlp otomatis"""
@@ -22,13 +28,22 @@ def auto_update_yt_dlp():
     except Exception as e:
         print(f"⚠️ Gagal update yt-dlp: {e}")
 
+def get_cookies_file(url: str):
+    """Pilih file cookies sesuai platform"""
+    for domain, path in COOKIES_MAP.items():
+        if domain in url:
+            return path if os.path.exists(path) else None
+    return None
+
 def download_video(url: str):
     """Download video + audio DASH otomatis dan merge jadi MP4"""
     auto_update_yt_dlp()
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+    cookies_file = get_cookies_file(url)
+
     ydl_opts = {
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
+        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
         "merge_output_format": "mp4",
         "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title).200B.%(ext)s"),
         "restrictfilenames": True,
@@ -37,7 +52,7 @@ def download_video(url: str):
         "no_warnings": False,
         "ignoreerrors": True,
         "ffmpeg_location": FFMPEG_PATH,
-        "cookies": COOKIES_FILE if os.path.exists(COOKIES_FILE) else None,
+        "cookies": cookies_file,
         "progress_hooks": [
             lambda d: print(f"🔹 status: {d['status']}, filename: {d.get('filename','')}")
         ],
@@ -60,6 +75,7 @@ def download_video(url: str):
                         break
 
             if os.path.exists(final_filename):
+                print(f"\n✅ Berhasil disimpan di: {final_filename}")
                 return final_filename
             else:
                 raise Exception(f"File hasil tidak ditemukan. Cek folder {DOWNLOAD_DIR}.")
@@ -68,5 +84,5 @@ def download_video(url: str):
         return {"error": str(e)}
 
 if __name__ == "__main__":
-    url = input("Masukkan URL video YouTube: ")
+    url = input("Masukkan URL video: ")
     print(download_video(url))

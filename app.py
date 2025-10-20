@@ -9,7 +9,7 @@ app = Flask(__name__)
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# File cookies YouTube
+# File cookies YouTube & lainnya
 COOKIE_FILE = os.path.join(os.path.dirname(__file__), "youtube.com_cookies.txt")
 
 # Daftar artikel
