@@ -9,8 +9,34 @@ app = Flask(__name__)
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+# File cookies untuk YouTube login
+COOKIE_FILE = os.path.join(os.path.dirname(__file__), "youtube_cookies.txt")
+
 # Daftar artikel yang tersedia
 ALLOWED_ARTICLES = ['artikel1', 'artikel2', 'artikel3']
+
+def get_video_info(url):
+    """
+    Mengambil info video menggunakan yt-dlp dengan cookies
+    """
+    ydl_opts = {
+        'format': 'best',
+        'quiet': True,
+        'noplaylist': True,
+        'cookies': COOKIE_FILE  # pakai cookies YouTube
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return {
+                'title': info.get('title'),
+                'thumbnail': info.get('thumbnail'),
+                'url': info.get('webpage_url')
+            }
+    except yt_dlp.utils.DownloadError as e:
+        return {'error': str(e)}
+    except Exception as e:
+        return {'error': str(e)}
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -28,17 +54,16 @@ def home():
             message = "Masukkan URL terlebih dahulu."
         else:
             try:
-                # --- Tahap 1: Preview Info Video ---
                 if action == "preview":
-                    ydl_opts_info = {'quiet': True, 'noplaylist': True}
-                    with yt_dlp.YoutubeDL(ydl_opts_info) as ydl:
-                        info = ydl.extract_info(url, download=False)
-                        thumbnail_url = info.get('thumbnail')
-                        video_title = info.get('title')
+                    info = get_video_info(url)
+                    if 'error' in info:
+                        message = f"Gagal memuat info video: {info['error']}"
+                    else:
+                        thumbnail_url = info['thumbnail']
+                        video_title = info['title']
 
-                # --- Tahap 2: Download Video ---
                 elif action == "download":
-                    hasil = download_video(url)
+                    hasil = download_video(url, cookies=COOKIE_FILE)  # pastikan download_video menerima cookies
                     if isinstance(hasil, dict) and "error" in hasil:
                         message = hasil["error"]
                     elif isinstance(hasil, str) and os.path.isfile(hasil):
@@ -58,7 +83,6 @@ def home():
         url=url
     )
 
-
 @app.route('/download/<filename>')
 def download_file(filename):
     path = os.path.join(DOWNLOAD_DIR, filename)
@@ -66,16 +90,13 @@ def download_file(filename):
         return send_file(path, as_attachment=True)
     return "File tidak ditemukan", 404
 
-
 @app.route('/privacy')
 def privacy():
     return render_template('privacy.html')
 
-
 @app.route('/terms')
 def terms():
     return render_template('terms.html')
-
 
 @app.route('/artikel/<nama>')
 def artikel(nama):
@@ -83,7 +104,6 @@ def artikel(nama):
         return render_template(f"{nama}.html")
     else:
         return "Artikel tidak ditemukan", 404
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
