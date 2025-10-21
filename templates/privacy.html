@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Vidosun Downloader</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #e0e0e0; padding: 30px; }
+        .container { max-width: 700px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #00bfff; }
+        p, li { line-height: 1.6; }
+        ul { padding-left: 20px; }
+        a { color: #00bfff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { text-align: center; margin-top: 30px; font-size: 13px; color: #666; }
+
+        .container {
+    max-width: 700px;       /* maksimal lebar untuk desktop */
+    width: 95%;             /* otomatis mengikuti lebar layar HP */
+    margin: auto;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+ /* Tombol Back */
+    .btn-back {
+    display: inline-block;          /* jadikan block supaya bisa margin auto */
+    margin: 0 auto 15px auto; /* atas 0, kanan & kiri auto, bawah 15px */
+    padding: 8px 15px;
+    background: #007BFF;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.btn-back:hover { background: #0056b3; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn-back" onclick="window.history.back()">←</button>
+        <h1>📄 Privacy Policy</h1>
+        <p>Vidosun Downloader menghargai privasi pengguna. Berikut hal-hal yang perlu diketahui:</p>
+        <ul>
+            <li>Kami tidak menyimpan video yang diunduh oleh pengguna di server kami.</li>
+            <li>Tidak ada informasi pribadi yang dikumpulkan kecuali yang disediakan secara sukarela melalui email atau kontak.</li>
+            <li>Kami menggunakan cookies hanya untuk meningkatkan pengalaman pengguna di situs ini.</li>
+            <li>Semua aktivitas download dilakukan langsung dari sumber sosial media dan berada di sisi pengguna.</li>
+        </ul>
+        <p>Dengan menggunakan layanan kami, Anda menyetujui kebijakan privasi ini.</p>
+    </div>
+    <footer>© 2025 Vidosun.com — Built with ❤️ using Flask & yt-dlp</footer>
+</body>
+</html>

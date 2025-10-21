@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Downloader Multi-Sosmed</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        /* === Dark Mode Styles === */
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #121212; 
+            color: #e0e0e0; 
+            padding: 30px; 
+        }
+        .container { 
+            max-width: 500px; 
+            margin: auto; 
+            background: #1e1e1e; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        input[type=text], input[type=file] { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border: 1px solid #555; 
+            background: #2b2b2b; 
+            color: #e0e0e0;
+        }
+        button { 
+            padding: 10px 20px; 
+            background: #007BFF; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #0056b3; }
+        .message { color: #ff6b6b; margin: 10px 0; }
+        .download-link { margin-top: 15px; display: block; color: #00bfff; text-decoration: none; }
+        .download-link:hover { text-decoration: underline; }
+
+        /* === Collapsible README === */
+        .readme { 
+            background: #2b2b2b; 
+            border-left: 4px solid #007BFF; 
+            padding: 10px 15px; 
+            margin-top: 20px; 
+            border-radius: 5px; 
+        }
+        .readme h3 { 
+            margin: 0; 
+            color: #00bfff; 
+            cursor: pointer; 
+        }
+        .readme-content { 
+            display: none; 
+            margin-top: 10px; 
+        }
+        .readme-content a { color: #00bfff; text-decoration: none; }
+        .readme-content a:hover { text-decoration: underline; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+      <div class="container">
+        <h2>Downloader Multi-Sosmed</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="text" name="url" placeholder="Masukkan URL video (YouTube/IG/Facebook)" required>
+            <input type="file" name="cookies" accept=".txt">
+            <button type="submit">Download</button>
+        </form>
+
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
+
+        {% if file_path %}
+            <a class="download-link" href="{{ url_for('download_file', filename=file_path.split('/')[-1]) }}">⬇️ Klik untuk download video</a>
+        {% endif %}
+      </div>
+
+      <!-- Collapsible README / Info tambahan -->
+      <div class="container readme">
+        <h3 onclick="toggleReadme()">🎬 Vidosun Downloader (Klik untuk info)</h3>
+        <div class="readme-content">
+            <p>Selamat datang di Vidosun Downloader — aplikasi web sederhana untuk mengunduh video dan audio dari YouTube, TikTok, dan berbagai sosial media lainnya secara cepat dan gratis.</p>
+            <p>🌐 Website Resmi: <a href="https://vidosun.com" target="_blank">https://vidosun.com</a></p>
+            <h4>🚀 Fitur Utama</h4>
+            <ul>
+                <li>✅ Salin link video dari sosial media.</li>
+                <li>🎵 Tempelkan link ke kolom input di halaman utama.</li>
+                <li>🎥 Tekan Enter atau Submit untuk mulai download.</li>
+                <li>📊 Tunggu hingga file dikirim ke browser Anda.</li>
+                <li>⚡ Gunakan tombol silang di kanan input untuk reset link.</li>
+                <li>🗂 Jika video membutuhkan login, upload cookies file dari browser.</li>
+            </ul>
+            <p>🌍 ## Support
+                Email: womisa2008@gmail.com</p>
+            </p>
+        </div>
+      </div>
+
+    <script>
+        function toggleReadme() {
+            const content = document.querySelector('.readme-content');
+            content.style.display = (content.style.display === "block") ? "none" : "block";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vidosun - Downloader Sosial Media</title>
+<style>
+  body {
+    background: #0d0d0d;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+  }
+  .container {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+  }
+  .clear-btn {
+    position: absolute;
+    right: 20px;
+    top: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #ffce00;
+  }
+  button {
+    margin-top: 12px;
+    padding: 12px 25px;
+    border-radius: 8px;
+    border: none;
+    background: #ffce00;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #ffd700; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Unduh Video</h2>
+  <input type="text" id="urlInput" placeholder="Tempel link video di sini...">
+  <span class="clear-btn" id="resetBtn">✕</span>
+  <button id="downloadBtn">Download</button>
+</div>
+
+<script>
+const urlInput = document.getElementById("urlInput");
+const downloadBtn = document.getElementById("downloadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+downloadBtn.addEventListener("click", async () => {
+  const url = urlInput.value.trim();
+  if (!url) return alert("Masukkan URL video terlebih dahulu!");
+
+  downloadBtn.disabled = true;
+  try {
+    let res = await fetch("/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ url })
+    });
+    let data = await res.json();
+    if (data.status === "started") {
+      // Tunggu file siap
+      let interval = setInterval(async () => {
+        let r = await fetch(`/getfile?url=${encodeURIComponent(url)}`);
+        if (r.status === 200) {
+          let file = await r.json();
+          clearInterval(interval);
+          downloadBtn.disabled = false;
+          window.location.href = file.url;
+        }
+      }, 2000);
+    } else {
+      alert("Gagal download");
+      downloadBtn.disabled = false;
+    }
+  } catch (err) {
+    alert("Server error");
+    downloadBtn.disabled = false;
+  }
+});
+
+// Reset tombol silang
+resetBtn.addEventListener("click", async () => {
+  const url = urlInput.value.trim();
+  if (!url) {
+    urlInput.value = "";
+    return;
+  }
+  await fetch("/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ url })
+  });
+  urlInput.value = "";
+  downloadBtn.disabled = false;
+});
+</script>
+
+</body>
+</html>

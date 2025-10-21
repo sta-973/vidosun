@@ -1,0 +1,15 @@
+# Folder Python cache
+__pycache__/
+*.pyc
+
+# Log file
+*.log
+
+# Folder downloads (video hasil download)
+downloads/
+
+# Config atau secrets lain (jika ada)
+.env
+
+# Jangan ignore folder cookies! Agar ikut deploy ke Render
+# cookies/

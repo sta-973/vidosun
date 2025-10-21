@@ -22,3 +22,9 @@ Selamat datang di **Vidosun Downloader** — aplikasi web sederhana untuk mengun
 ```bash
 git clone https://github.com/sta-973/vidosun.git
 cd vidosun
+## Instalasi
+1. Clone atau download project ini.
+2. Pastikan Python 3.10+ sudah terinstall.
+3. Install dependencies:
+```bash
+pip install flask flask-cors
