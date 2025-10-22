@@ -4,6 +4,7 @@ import yt_dlp
 import subprocess
 from datetime import datetime
 import requests
+import webbrowser  # <- tambahan untuk buka browser update cookies
 
 # ----- Folder download -----
 BASE_DIR = os.path.dirname(__file__)
@@ -56,6 +57,53 @@ def get_cookies_file(url: str):
                 log(f"⚠️ Cookies file untuk {domain} tidak ditemukan: {path}")
                 return None
     return None
+
+# ----- Update expired cookies -----
+def update_expired_cookies():
+    """
+    Cek semua cookies di COOKIES_MAP.
+    Jika expired / tidak valid, buka browser untuk login manual.
+    """
+    for domain, path in COOKIES_MAP.items():
+        test_url_map = {
+            "youtube.com": "https://www.youtube.com/",
+            "instagram.com": "https://www.instagram.com/",
+            "facebook.com": "https://www.facebook.com/",
+            "threads.net": "https://www.threads.net/",
+            "tiktok.com": "https://www.tiktok.com/"
+        }
+        test_url = test_url_map.get(domain)
+        if not test_url:
+            continue
+
+        needs_update = False
+        if not os.path.exists(path):
+            log(f"⚠️ File cookies {path} tidak ditemukan.")
+            needs_update = True
+        else:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                cookies_dict = {}
+                for line in lines:
+                    if not line.strip() or line.startswith("#"):
+                        continue
+                    parts = line.strip().split("\t")
+                    if len(parts) >= 7:
+                        cookies_dict[parts[5]] = parts[6]
+
+                resp = requests.get(test_url, cookies=cookies_dict, timeout=10)
+                if resp.status_code not in [200, 302]:
+                    log(f"⚠️ Cookies mungkin expired untuk {domain}, status code: {resp.status_code}")
+                    needs_update = True
+            except Exception as e:
+                log(f"⚠️ Gagal cek cookies {path}: {e}")
+                needs_update = True
+
+        if needs_update:
+            log(f"🌐 Membuka browser untuk update cookies {domain}")
+            webbrowser.open(test_url)
+            log(f"➡️ Silakan login, export cookies ke: {path}")
 
 # ----- Cek validitas cookies -----
 def check_cookies(url: str):
@@ -167,6 +215,7 @@ def download_from_list(file_path="list.txt"):
 
 # ----- Main -----
 if __name__ == "__main__":
+    update_expired_cookies()  # <- cek semua cookies, buka browser jika expired
     choice = input("Masukkan URL video atau ketik 'list' untuk multi-download: ").strip()
     if choice.lower() == "list":
         download_from_list()
