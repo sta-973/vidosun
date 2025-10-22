@@ -32,11 +32,11 @@ if not FFMPEG_PATH:
 
 # ----- Cookies per platform -----
 COOKIES_MAP = {
-    "youtube.com": os.path.join(BASE_DIR, "youtube.com_cookies.txt"),
-    "instagram.com": os.path.join(BASE_DIR, "instagram.com_cookies.txt"),
-    "facebook.com": os.path.join(BASE_DIR, "facebook.com_cookies.txt"),
-    "threads.net": os.path.join(BASE_DIR, "threads.com_cookies.txt"),
-    "tiktok.com": os.path.join(BASE_DIR, "tiktok.com_cookies.txt")
+    "youtube.com": os.path.join(BASE_DIR, "cookies", "youtube.com_cookies.txt"),
+    "instagram.com": os.path.join(BASE_DIR, "cookies", "instagram.com_cookies.txt"),
+    "facebook.com": os.path.join(BASE_DIR, "cookies", "facebook.com_cookies.txt"),
+    "threads.net": os.path.join(BASE_DIR, "cookies", "threads.com_cookies.txt"),
+    "tiktok.com": os.path.join(BASE_DIR, "cookies", "tiktok.com_cookies.txt")
 }
 
 # ----- Logging helper -----
