@@ -1,14 +1,70 @@
 from flask import Flask, render_template, request, send_file
-from download_video import probe_video, download_video_public
 import os
+import yt_dlp
+import logging
+
+# ----- Logging debug -----
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
-# ----- Folder dasar -----
+# ----- Folder download -----
 BASE_DIR = os.path.dirname(__file__)
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+# ----- Probe video (cek status tanpa download) -----
+def probe_video(url):
+    """
+    Mengembalikan status video dan metadata tanpa download.
+    status: public | private | age_restricted | not_found | error
+    """
+    ydl_opts = {
+        'quiet': True,
+        'skip_download': True,
+        'nocheckcertificate': True,
+        'noplaylist': True,
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            if info is None:
+                return {'status':'not_found','title':None,'thumbnail':None,'reason':'Tidak ada info.'}
+
+            # cek age_limit
+            if info.get('age_limit',0) >= 18:
+                return {'status':'age_restricted','title':info.get('title'),'thumbnail':info.get('thumbnail'),'reason':'Perlu verifikasi umur.'}
+
+            return {'status':'public','title':info.get('title'),'thumbnail':info.get('thumbnail'),'reason':None}
+
+    except yt_dlp.utils.DownloadError as e:
+        msg = str(e)
+        if 'private' in msg.lower():
+            return {'status':'private','title':None,'thumbnail':None,'reason':'Video bersifat privat.'}
+        if 'not available' in msg.lower() or '404' in msg:
+            return {'status':'not_found','title':None,'thumbnail':None,'reason':msg}
+        return {'status':'error','title':None,'thumbnail':None,'reason':msg}
+    except Exception as e:
+        return {'status':'error','title':None,'thumbnail':None,'reason':str(e)}
+
+# ----- Download video publik -----
+def download_video(url):
+    """Download video publik tanpa cookies"""
+    try:
+        ydl_opts = {
+            'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
+            'format': 'best',
+            'noplaylist': True,
+            'quiet': False,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
+            return filename
+    except Exception as e:
+        return {'error': f"Gagal mengunduh: {e}"}
+
+# ----- Route utama -----
 @app.route('/', methods=['GET', 'POST'])
 def home():
     message = ""
@@ -26,26 +82,29 @@ def home():
         if not url:
             message = "Masukkan URL terlebih dahulu."
         else:
-            if action == "preview":
+            try:
                 info = probe_video(url)
                 status = info['status']
+                video_title = info.get('title')
+                thumbnail_url = info.get('thumbnail')
                 reason = info.get('reason')
-                if status == 'public':
-                    thumbnail_url = info['thumbnail']
-                    video_title = info['title']
 
-            elif action == "download":
-                info = probe_video(url)
-                status = info['status']
-                reason = info.get('reason')
-                if status == 'public':
-                    hasil = download_video_public(url)
-                    if isinstance(hasil, str) and os.path.isfile(hasil):
-                        file_path = hasil
+                if action == "download":
+                    if status == "public":
+                        hasil = download_video(url)
+                        if isinstance(hasil, dict) and "error" in hasil:
+                            message = hasil["error"]
+                        elif isinstance(hasil, str) and os.path.isfile(hasil):
+                            file_path = hasil
+                        else:
+                            message = "Gagal mengunduh video."
                     else:
-                        message = hasil.get('error', 'Gagal mengunduh video.')
-                else:
-                    message = f"Tidak bisa download: {reason}"
+                        message = "Video tidak bisa diunduh karena bersifat private / terbatas."
+
+            except Exception as e:
+                message = f"Gagal memproses URL: {e}"
+                status = "error"
+                reason = str(e)
 
     return render_template(
         'index.html',
@@ -58,6 +117,7 @@ def home():
         reason=reason
     )
 
+# ----- Route download file -----
 @app.route('/download/<filename>')
 def download_file(filename):
     path = os.path.join(DOWNLOAD_DIR, filename)
@@ -65,6 +125,7 @@ def download_file(filename):
         return send_file(path, as_attachment=True)
     return "File tidak ditemukan", 404
 
+# ----- Route privacy & terms -----
 @app.route('/privacy')
 def privacy():
     return render_template('privacy.html')
@@ -73,6 +134,7 @@ def privacy():
 def terms():
     return render_template('terms.html')
 
+# ----- Route artikel -----
 @app.route('/artikel/<nama>')
 def artikel(nama):
     allowed_articles = ['artikel1', 'artikel2', 'artikel3']
