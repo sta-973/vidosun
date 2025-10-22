@@ -11,5 +11,6 @@ downloads/
 # Config atau secrets lain (jika ada)
 .env
 
-# Jangan ignore folder cookies! Agar ikut deploy ke Render
-# cookies/
+# Folder cookies tetap ada di repo tapi file di dalamnya di-ignore
+#cookies/*
+#!cookies/.gitkeep
