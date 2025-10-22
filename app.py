@@ -1,57 +1,11 @@
 from flask import Flask, render_template, request, send_file
-from download_video import download_video
+from download_video import download_video_public
 import os
-import yt_dlp
 
 app = Flask(__name__)
 
-# ----- Folder dasar -----
-BASE_DIR = os.path.dirname(__file__)
-DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
+DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
-# ----- Peta cookies per domain -----
-COOKIES_MAP = {
-    "youtube.com": "/data/cookies/youtube.com_cookies.txt",
-    "instagram.com": "/data/cookies/instagram.com_cookies.txt",
-    "facebook.com": "/data/cookies/facebook.com_cookies.txt",
-    "threads.net": "/data/cookies/threads.net_cookies.txt",
-    "tiktok.com": "/data/cookies/tiktok.com_cookies.txt",
-}
-
-def get_cookies_file(url: str):
-    """Deteksi domain dan pilih cookies yang sesuai."""
-    for domain, path in COOKIES_MAP.items():
-        if domain in url:
-            if os.path.exists(path):
-                print(f"🟢 Menggunakan cookies {domain} dari {path}")
-                return path
-            else:
-                print(f"⚠️ File cookies untuk {domain} tidak ditemukan: {path}")
-                return None
-    return None
-
-# ----- Ambil info video -----
-def get_video_info(url, cookies_file=None):
-    ydl_opts = {
-        'format': 'best',
-        'quiet': True,
-        'noplaylist': True,
-    }
-
-    if cookies_file and os.path.exists(cookies_file):
-        ydl_opts['cookies'] = cookies_file
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            return {
-                'title': info.get('title'),
-                'thumbnail': info.get('thumbnail'),
-                'url': info.get('webpage_url')
-            }
-    except Exception as e:
-        return {'error': str(e)}
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -68,24 +22,27 @@ def home():
         if not url:
             message = "Masukkan URL terlebih dahulu."
         else:
-            cookies_file = get_cookies_file(url)
+            try:
+                if action == "preview":
+                    # Info video publik (thumbnail + title)
+                    ydl_opts = {'quiet': True, 'skip_download': True}
+                    import yt_dlp
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(url, download=False)
+                        thumbnail_url = info.get('thumbnail')
+                        video_title = info.get('title')
 
-            if action == "preview":
-                info = get_video_info(url, cookies_file)
-                if 'error' in info:
-                    message = f"Gagal memuat info video: {info['error']}"
-                else:
-                    thumbnail_url = info['thumbnail']
-                    video_title = info['title']
+                elif action == "download":
+                    hasil = download_video_public(url)
+                    if isinstance(hasil, dict) and "error" in hasil:
+                        message = hasil["error"]
+                    elif isinstance(hasil, str) and os.path.isfile(hasil):
+                        file_path = hasil
+                    else:
+                        message = "Gagal mengunduh video."
 
-            elif action == "download":
-                hasil = download_video(url)
-                if isinstance(hasil, dict) and "error" in hasil:
-                    message = hasil["error"]
-                elif isinstance(hasil, str) and os.path.isfile(hasil):
-                    file_path = hasil
-                else:
-                    message = "Gagal mengunduh video."
+            except Exception as e:
+                message = f"Gagal memuat info video: {e}"
 
     return render_template(
         'index.html',
@@ -113,8 +70,8 @@ def terms():
 
 @app.route('/artikel/<nama>')
 def artikel(nama):
-    allowed_articles = ['artikel1', 'artikel2', 'artikel3']
-    if nama in allowed_articles:
+    ALLOWED_ARTICLES = ['artikel1', 'artikel2', 'artikel3']
+    if nama in ALLOWED_ARTICLES:
         return render_template(f"{nama}.html")
     return "Artikel tidak ditemukan", 404
 
