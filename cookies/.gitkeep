@@ -1,0 +1,5 @@
+cd cookies
+echo "" > .gitkeep
+git add cookies/.gitkeep
+git commit -m "Add empty cookies folder for Render deployment"
+git push origin master
