@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, send_file
-from download_video import download_video
+from download_video import probe_video, download_video_public
 import os
-import yt_dlp
 
 app = Flask(__name__)
 
@@ -9,35 +8,6 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(__file__)
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
-# ----- Ambil info video publik -----
-def get_video_info(url):
-    ydl_opts = {
-        'format': 'best',
-        'quiet': True,
-        'noplaylist': True,
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            # Tentukan status video
-            status = 'public'
-            if info.get('is_private'):
-                status = 'private'
-            elif info.get('age_limit', 0) > 0:
-                status = 'age_restricted'
-            elif info.get('availability') == 'region_restricted':
-                status = 'region_restricted'
-            return {
-                'title': info.get('title'),
-                'thumbnail': info.get('thumbnail'),
-                'url': info.get('webpage_url'),
-                'status': status,
-                'reason': None
-            }
-    except Exception as e:
-        return {'error': str(e), 'status': 'needs_cookies', 'reason': str(e)}
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -57,25 +27,25 @@ def home():
             message = "Masukkan URL terlebih dahulu."
         else:
             if action == "preview":
-                info = get_video_info(url)
-                if 'error' in info:
-                    message = f"Gagal memuat info video: {info['error']}"
-                    status = info.get('status')
-                    reason = info.get('reason')
-                else:
+                info = probe_video(url)
+                status = info['status']
+                reason = info.get('reason')
+                if status == 'public':
                     thumbnail_url = info['thumbnail']
                     video_title = info['title']
-                    status = info.get('status')
-                    reason = info.get('reason')
 
             elif action == "download":
-                hasil = download_video(url)
-                if isinstance(hasil, dict) and "error" in hasil:
-                    message = hasil["error"]
-                elif isinstance(hasil, str) and os.path.isfile(hasil):
-                    file_path = hasil
+                info = probe_video(url)
+                status = info['status']
+                reason = info.get('reason')
+                if status == 'public':
+                    hasil = download_video_public(url)
+                    if isinstance(hasil, str) and os.path.isfile(hasil):
+                        file_path = hasil
+                    else:
+                        message = hasil.get('error', 'Gagal mengunduh video.')
                 else:
-                    message = "Gagal mengunduh video."
+                    message = f"Tidak bisa download: {reason}"
 
     return render_template(
         'index.html',
