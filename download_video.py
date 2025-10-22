@@ -6,12 +6,18 @@ from datetime import datetime
 import requests
 import webbrowser  # <- tambahan untuk buka browser update cookies
 
+# ----- Folder base -----
+BASE_DIR = "/data"  # gunakan disk permanen render
+
 # ----- Folder download -----
-BASE_DIR = os.path.dirname(__file__)
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# ----- Folder log -----
+# ----- Folder cookies -----
+COOKIES_DIR = os.path.join(BASE_DIR, "cookies")
+os.makedirs(COOKIES_DIR, exist_ok=True)
+
+# ----- File log -----
 LOG_FILE = os.path.join(BASE_DIR, "download.log")
 
 # ----- Auto-detect FFmpeg path -----
