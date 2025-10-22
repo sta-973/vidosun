@@ -5,24 +5,43 @@ import yt_dlp
 
 app = Flask(__name__)
 
-# Folder download
-DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
+# ----- Folder dasar -----
+BASE_DIR = os.path.dirname(__file__)
+DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# File cookies YouTube & lainnya
-COOKIE_FILE = os.path.join(os.path.dirname(__file__), "youtube.com_cookies.txt")
+# ----- Peta cookies per domain -----
+COOKIES_MAP = {
+    "youtube.com": "/data/cookies/youtube.com_cookies.txt",
+    "instagram.com": "/data/cookies/instagram.com_cookies.txt",
+    "facebook.com": "/data/cookies/facebook.com_cookies.txt",
+    "threads.net": "/data/cookies/threads.net_cookies.txt",
+    "tiktok.com": "/data/cookies/tiktok.com_cookies.txt",
+}
 
-# Daftar artikel
-ALLOWED_ARTICLES = ['artikel1', 'artikel2', 'artikel3']
+def get_cookies_file(url: str):
+    """Deteksi domain dan pilih cookies yang sesuai."""
+    for domain, path in COOKIES_MAP.items():
+        if domain in url:
+            if os.path.exists(path):
+                print(f"🟢 Menggunakan cookies {domain} dari {path}")
+                return path
+            else:
+                print(f"⚠️ File cookies untuk {domain} tidak ditemukan: {path}")
+                return None
+    return None
 
-def get_video_info(url):
-    """Ambil info video dengan cookies"""
+# ----- Ambil info video -----
+def get_video_info(url, cookies_file=None):
     ydl_opts = {
         'format': 'best',
         'quiet': True,
         'noplaylist': True,
-        'cookies': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None
     }
+
+    if cookies_file and os.path.exists(cookies_file):
+        ydl_opts['cookies'] = cookies_file
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -44,31 +63,29 @@ def home():
 
     if request.method == 'POST':
         url = request.form.get('url')
-        action = request.form.get('action')  # "preview" atau "download"
+        action = request.form.get('action')
 
         if not url:
             message = "Masukkan URL terlebih dahulu."
         else:
-            try:
-                if action == "preview":
-                    info = get_video_info(url)
-                    if 'error' in info:
-                        message = f"Gagal memuat info video: {info['error']}"
-                    else:
-                        thumbnail_url = info['thumbnail']
-                        video_title = info['title']
+            cookies_file = get_cookies_file(url)
 
-                elif action == "download":
-                    hasil = download_video(url)
-                    if isinstance(hasil, dict) and "error" in hasil:
-                        message = hasil["error"]
-                    elif isinstance(hasil, str) and os.path.isfile(hasil):
-                        file_path = hasil
-                    else:
-                        message = "Gagal mengunduh video."
+            if action == "preview":
+                info = get_video_info(url, cookies_file)
+                if 'error' in info:
+                    message = f"Gagal memuat info video: {info['error']}"
+                else:
+                    thumbnail_url = info['thumbnail']
+                    video_title = info['title']
 
-            except Exception as e:
-                message = f"Gagal memuat info video: {e}"
+            elif action == "download":
+                hasil = download_video(url)
+                if isinstance(hasil, dict) and "error" in hasil:
+                    message = hasil["error"]
+                elif isinstance(hasil, str) and os.path.isfile(hasil):
+                    file_path = hasil
+                else:
+                    message = "Gagal mengunduh video."
 
     return render_template(
         'index.html',
@@ -96,7 +113,8 @@ def terms():
 
 @app.route('/artikel/<nama>')
 def artikel(nama):
-    if nama in ALLOWED_ARTICLES:
+    allowed_articles = ['artikel1', 'artikel2', 'artikel3']
+    if nama in allowed_articles:
         return render_template(f"{nama}.html")
     return "Artikel tidak ditemukan", 404
 
